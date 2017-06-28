@@ -1,7 +1,6 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 #include "tokens.h"
 #include "utils.h"
@@ -110,35 +109,10 @@ void parseLine(char* line, void* tokens) {
     }
 }
 
-void printText(char* t) {
-    for (int cnt = *t; cnt != 0; cnt--) {
-        putc(*(++t), stdout);
-    }
-};
-
-void printToken(token* t) {
-    switch (t->type) {
-        case TT_NUMBER:
-            printf("{INT %d}", t->body.integer);
-            break;
-        case TT_NAME:
-            printf("{NAME \"");
-            printText(t->body.text);
-            printf("\"}");
-            break;
-        case TT_LITERAL:
-            printf("{STR \"");
-            printText(t->body.text);
-            printf("\"}");
-            break;
-        case TT_SYMBOL:
-            printf("{SYM '%c'}", t->body.symbol);
-            break;
-        case TT_NONE:
-            printf("{NONE}");
-            break;
-        default:
-            printf("{ERROR}");
-    }
+int tokenClass(token* t) {
+    return t->type & 0xF0;
 }
 
+char* getParseError(void) {
+    return parseError;
+}

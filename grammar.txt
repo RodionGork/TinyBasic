@@ -2,10 +2,10 @@ line ::= [number] statement
 
 statement ::= PRINT expr-list
               IF expression relop expression THEN statement
-              GOTO expression
+              GOTO number
               INPUT var-list
               LET var = expression
-              GOSUB expression
+              GOSUB number
               RETURN
               END
 

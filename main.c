@@ -17,18 +17,58 @@ void readLine(void) {
     trim(line);
 }
 
-int processLine(void) {
+
+void printText(char* t) {
+    for (int cnt = *t; cnt != 0; cnt--) {
+        putc(*(++t), stdout);
+    }
+};
+
+void printToken(token* t) {
+    switch (t->type) {
+        case TT_NUMBER:
+            printf("{INT %d}", t->body.integer);
+            break;
+        case TT_NAME:
+            printf("{NAME \"");
+            printText(t->body.text);
+            printf("\"}");
+            break;
+        case TT_LITERAL:
+            printf("{STR \"");
+            printText(t->body.text);
+            printf("\"}");
+            break;
+        case TT_SYMBOL:
+            printf("{SYM '%c'}", t->body.symbol);
+            break;
+        case TT_NONE:
+            printf("{NONE}");
+            break;
+        default:
+            printf("{ERROR}");
+    }
+}
+
+void printTokens(void) {
     void* t = (void*) toks;
-    parseLine(line, toks);
     while (1) {
         printToken(t);
         printf(" ");
-        if (((token*)t)->type == TT_NONE || ((token*)t)->type == TT_ERROR) {
+        if (tokenClass(t) == TT_NONE) {
             break;
         }
         t += tokenSize(t);
     }
     printf("\n");
+}
+
+int processLine(void) {
+    parseLine(line, toks);
+    printTokens();
+    if (getParseError() != NULL) {
+        printf("Error at pos: %d\n", (int) (getParseError() - line) + 1);
+    }
     if (strcmp(line, "quit") == 0) {
         return 1;
     }
