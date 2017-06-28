@@ -1,1 +1,1 @@
-gcc -o tinybas main.c utils.c
+gcc -o tinybas main.c tokens.c utils.c

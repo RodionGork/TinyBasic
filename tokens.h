@@ -1,6 +1,8 @@
-#ifndef __MAIN_H_
-#define __MAIN_H_
+#ifndef __TOKENS_H_
+#define __TOKENS_H_
 
+#define TT_NONE 0x00
+#define TT_ERROR 0x01
 #define TT_NUMBER 0x10
 #define TT_NAME 0x20
 #define TT_SYMBOL 0x30
@@ -15,7 +17,11 @@ typedef union tbody {
 typedef struct token {
     char type;
     tbody body;
-} token;
+} __attribute__((packed)) token;
+
+void parseLine(char* line, void* tokens);
+int tokenSize(token* t);
+void printToken(token* t);
 
 #endif
 

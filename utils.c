@@ -1,3 +1,5 @@
+#include <ctype.h>
+
 void trim(char* s) {
     int i = 0, k;
     while (s[i] != 0 && s[i] <= ' ') {
@@ -12,3 +14,9 @@ void trim(char* s) {
     } while (k >= 0 && s[k] <= ' ');
 }
 
+char* skipSpaces(char* s) {
+    while (isspace(*s)) {
+        s++;
+    }
+    return s;
+}
