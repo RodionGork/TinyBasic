@@ -1,0 +1,1 @@
+gcc -o tinybas main.c utils.c

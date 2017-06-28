@@ -1,0 +1,37 @@
+line ::= [number] statement
+
+statement ::= PRINT expr-list
+              IF expression relop expression THEN statement
+              GOTO expression
+              INPUT var-list
+              LET var = expression
+              GOSUB expression
+              RETURN
+              END
+
+expr-list ::= (string|expression) (, (string|expression) )*
+
+var-list ::= var (, var)*
+
+expression ::= (+|-|ε) term ((+|-) term)*
+
+term ::= factor ((*|/) factor)*
+
+factor ::= var | number | (expression)
+
+var ::= A..Z
+
+number ::= digit digit*
+
+digit ::= 0..9
+
+relop ::= < (>|=|ε) | > (<|=|ε) | =
+
+--------------------
+
+tokens:
+
+- number
+- name
+- literal
+- symbol , + - * / % ( ) < > = <= >= <>
