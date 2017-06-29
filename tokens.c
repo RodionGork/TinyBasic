@@ -13,7 +13,7 @@ int tokenSize(token* t) {
             return 1 + sizeof(t->body.integer);
         case TT_NAME:
         case TT_LITERAL:
-            return 2 + t->body.text[0];
+            return 2 + t->body.str.len;
         case TT_SYMBOL:
             return 1 + sizeof(t->body.symbol);
         case TT_NONE:
@@ -24,13 +24,13 @@ int tokenSize(token* t) {
 }
 
 char* parseName(char* s, token* tokens) {
-    int i = 0;
+    short i = 0;
     tokens->type = TT_NAME;
     while (isalnum(s[i])) {
-        tokens->body.text[i + 1] = s[i];
+        tokens->body.str.text[i] = toupper(s[i]);
         i++;
     }
-    tokens->body.text[0] = i;
+    tokens->body.str.len = i;
     return skipSpaces(s + i);
 }
 
@@ -48,10 +48,10 @@ char* parseLiteral(char* s, token* tokens) {
     int i = 1;
     tokens->type = TT_LITERAL;
     while (s[i] != 0 && s[i] != '"') {
-        tokens->body.text[i] = s[i];
+        tokens->body.str.text[i - 1] = s[i];
         i++;
     }
-    tokens->body.text[0] = i - 1;
+    tokens->body.str.len = i - 1;
     return skipSpaces(s + i + (s[i] == '"' ? 1 : 0));
 }
 
@@ -111,6 +111,16 @@ void parseLine(char* line, void* tokens) {
 
 int tokenClass(token* t) {
     return t->type & 0xF0;
+}
+
+int tokenNameEqual(token* t, char* s) {
+    if (tokenClass(t) != TT_NAME) {
+        return 0;
+    }
+    if (t->body.str.len != strlen(s)) {
+        return 0;
+    }
+    return memcmp(t->body.str.text, s, t->body.str.len) == 0;
 }
 
 char* getParseError(void) {

@@ -20,3 +20,11 @@ char* skipSpaces(char* s) {
     }
     return s;
 }
+
+char* skipDigits(char* s) {
+    while (isdigit(*s)) {
+        s++;
+    }
+    return s;
+}
+

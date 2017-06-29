@@ -8,10 +8,12 @@
 #define TT_SYMBOL 0x30
 #define TT_LITERAL 0x40
 
+#include "utils.h"
+
 typedef union tbody {
     short integer;
     char symbol;
-    char text[1];
+    nstring str;
 } tbody;
 
 typedef struct token {
@@ -22,6 +24,7 @@ typedef struct token {
 void parseLine(char* line, void* tokens);
 int tokenSize(token* t);
 int tokenClass(token* t);
+int tokenNameEqual(token* t, char* s);
 char* getParseError(void);
 
 #endif

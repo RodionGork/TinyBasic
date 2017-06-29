@@ -3,24 +3,24 @@
 #include <ctype.h>
 
 #include "tokens.h"
+#include "editor.h"
 #include "utils.h"
 
-#define MAX_PRG_SIZE 4096
 #define MAX_LINE_LEN 80
 
-char prg[MAX_PRG_SIZE];
 char line[MAX_LINE_LEN];
-char toks[MAX_LINE_LEN * 2];
+char toksBody[MAX_LINE_LEN * 2];
+
+void* toks = toksBody;
 
 void readLine(void) {
     fgets(line, sizeof(line), stdin);
     trim(line);
 }
 
-
-void printText(char* t) {
-    for (int cnt = *t; cnt != 0; cnt--) {
-        putc(*(++t), stdout);
+void printNStr(nstring* t) {
+    for (short i = 0; i < t->len; i++) {
+        putc(t->text[i], stdout);
     }
 };
 
@@ -31,12 +31,12 @@ void printToken(token* t) {
             break;
         case TT_NAME:
             printf("{NAME \"");
-            printText(t->body.text);
+            printNStr(&(t->body.str));
             printf("\"}");
             break;
         case TT_LITERAL:
             printf("{STR \"");
-            printText(t->body.text);
+            printNStr(&(t->body.str));
             printf("\"}");
             break;
         case TT_SYMBOL:
@@ -51,7 +51,7 @@ void printToken(token* t) {
 }
 
 void printTokens(void) {
-    void* t = (void*) toks;
+    void* t = toks;
     while (1) {
         printToken(t);
         printf(" ");
@@ -63,21 +63,34 @@ void printTokens(void) {
     printf("\n");
 }
 
+void printProgram() {
+    prgline* p = findLine(1);
+    while (p->num != 0) {
+        printf("%d ", p->num);
+        printNStr(&(p->str));
+        printf("\n");
+        p = findLine(p->num + 1);
+    }
+}
+
 int processLine(void) {
+    token* t = toks;
     parseLine(line, toks);
-    printTokens();
     if (getParseError() != NULL) {
         printf("Error at pos: %d\n", (int) (getParseError() - line) + 1);
-    }
-    if (strcmp(line, "quit") == 0) {
+    } else if (t->type == TT_NUMBER) {
+        injectLine(skipSpaces(skipDigits(line)), t->body.integer);
+    } else if (tokenNameEqual(t, "QUIT")) {
         return 1;
+    } else if (tokenNameEqual(t, "LIST")) {
+        printProgram();
     }
     return 0;
 }
 
 void init(void) {
     printf("\nTinyBasic 0.1-PoC\n\n");
-    prg[0] = 0;
+    initEditor();
 }
 
 void dispatch(void) {
