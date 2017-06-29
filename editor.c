@@ -1,5 +1,4 @@
 #include <string.h>
-#include <stdio.h>
 
 #include "editor.h"
 
@@ -29,21 +28,18 @@ prgline* findLine(int num) {
     return p;
 }
 
-void dump() {
-    int i;
-    for (i = 0; i < prgSize; i++) {
-        printf("%02X ", ((char*)prg)[i]);
-    }
-}
-
 void injectLine(char* s, int num) {
     unsigned char len = strlen(s);
     prgline* p = findLine(num);
-    memmove(p + len + 3, p, prg + prgSize - (void*) p);
-    prgSize += len + 3;
-    p->num = num;
-    p->str.len = len;
-    memcpy(p->str.text, s, len);
-    dump();
+    if (p->num == num) {
+        memmove(p, nextLine(p), prg + prgSize - (void*) nextLine(p));
+    }
+    if (len > 0) {
+        memmove(((void*)p) + len + 3, p, prg + prgSize - (void*) p);
+        prgSize += len + 3;
+        p->num = num;
+        p->str.len = len;
+        memcpy(p->str.text, s, len);
+    }
 }
 
