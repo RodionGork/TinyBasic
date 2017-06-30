@@ -6,6 +6,7 @@
 #define TT_NUMBER 0x10
 #define TT_NAME 0x20
 #define TT_COMMAND 0x21
+#define TT_VARIABLE 0x22
 #define TT_SYMBOL 0x30
 #define TT_LITERAL 0x40
 #define TT_COMMENT 0x41
@@ -37,7 +38,8 @@ void parseLine(char* line, void* tokens);
 int tokenSize(token* t);
 int tokenClass(token* t);
 int tokenNameEqual(token* t, char* s);
-char* getParseError(void);
+char* getParseErrorPos(void);
+char* getParseErrorMsg(void);
 
 #endif
 

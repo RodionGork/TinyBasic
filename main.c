@@ -34,6 +34,14 @@ void printToken(token* t) {
             printNStr(&(t->body.str));
             printf("\"}");
             break;
+        case TT_VARIABLE:
+            printf("{VAR \"");
+            printNStr(&(t->body.str));
+            printf("\"}");
+            break;
+        case TT_COMMAND:
+            printf("{CMD %d}", t->body.command);
+            break;
         case TT_LITERAL:
             printf("{STR \"");
             printNStr(&(t->body.str));
@@ -58,6 +66,7 @@ void printTokens(void) {
         if (tokenClass(t) == TT_NONE) {
             break;
         }
+        printf("tt%02x ", ((token*)t)->type);
         t += tokenSize(t);
     }
     printf("\n");
@@ -76,8 +85,9 @@ void printProgram() {
 int processLine(void) {
     token* t = toks;
     parseLine(line, toks);
-    if (getParseError() != NULL) {
-        printf("Error at pos: %d\n", (int) (getParseError() - line) + 1);
+    printTokens();
+    if (getParseErrorPos() != NULL) {
+        printf("Error '%s' at pos: %d\n", getParseErrorMsg(), (int) (getParseErrorPos() - line) + 1);
         return 0;
     }
     if (t->type == TT_NUMBER) {

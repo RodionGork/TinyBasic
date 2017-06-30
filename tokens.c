@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "tokens.h"
 #include "utils.h"
@@ -21,6 +22,13 @@ char* cmds[] = {
 char* errorMsgs[] = {
     "ok",
     "command or variable expected",
+    "assignment operator expected",
+    "variable name expected",
+    "comma expected",
+    "extra characters at line end",
+    "unexpected error",
+    "expected 'then' keyword",
+    "line number expected",
 };
 
 char* cur;
@@ -35,6 +43,7 @@ int tokenSize(token* t) {
             return 1 + sizeof(t->body.integer);
         case TT_NAME:
         case TT_LITERAL:
+        case TT_VARIABLE:
             return 2 + t->body.str.len;
         case TT_SYMBOL:
         case TT_COMMAND:
@@ -48,20 +57,27 @@ int tokenSize(token* t) {
 
 void setError(char* pos, char code) {
     parseErrorCode = code;
+    parseError = pos;
+    curTok->type = TT_ERROR;
+}
+
+token* nextToken(void* t) {
+    return t + tokenSize(t);
 }
 
 void advance(char* s) {
     cur = skipSpaces(s);
     prevTok = curTok;
-    curTok = ((void*) curTok) + tokenSize(curTok);
+    curTok = nextToken(curTok);
 }
 
 int trySubstCmd(void) {
     short i = 0;
     for (i = 0; cmds[i][0] != 0; i++) {
         if (tokenNameEqual(curTok, cmds[i])) {
-            curTok->type == TT_COMMAND;
+            curTok->type = TT_COMMAND;
             curTok->body.command = i;
+            nextToken(curTok)->type = TT_ERROR;
             return i;
         }
     }
@@ -100,23 +116,28 @@ int parseNumber(void) {
     return 1;
 }
 
-void parseComment(void) {
+int parseComment(void) {
     unsigned char len = strlen(cur);
     curTok->type == TT_COMMENT;
     curTok->body.str.len = len;
     memcpy(&(curTok->body.str.text), cur, len);
     advance(cur + len);
+    return 1;
 }
 
-char* parseLiteral(char* s, token* tokens) {
+int parseLiteral() {
+    if (*cur != '"') {
+        return 0;
+    }
     int i = 1;
-    tokens->type = TT_LITERAL;
-    while (s[i] != 0 && s[i] != '"') {
-        tokens->body.str.text[i - 1] = s[i];
+    curTok->type = TT_LITERAL;
+    while (cur[i] != 0 && cur[i] != '"') {
+        curTok->body.str.text[i - 1] = cur[i];
         i++;
     }
-    tokens->body.str.len = i - 1;
-    return skipSpaces(s + i + (s[i] == '"' ? 1 : 0));
+    curTok->body.str.len = i - 1;
+    advance(cur + i + (cur[i] == '"' ? 1 : 0));
+    return 1;
 }
 
 void parseSymbol() {
@@ -140,71 +161,131 @@ void parseSymbol() {
     advance(cur + 1);
 }
 
-void parseNone(void) {
-}
-
-/*
-char* parseToken(char* s, token* tokens) {
-    if (*s == 0) {
-        tokens->type = TT_NONE;
-        return NULL;
-    } else if (isalpha(*s)) {
-        return parseName(s, tokens);
-    } else if (isdigit(*s)) {
-        return parseNumber(s, tokens);
-    } else if (*s == '"') {
-        return parseLiteral(s, tokens);
-    } else if (strchr(",+-*%/()<>=", *s) != NULL) {
-        return parseSymbol(s, tokens);
+int parseNone(void) {
+    if (*cur != 0) {
+        setError(cur, 5);
+        return 0;
     }
-    tokens->type = TT_ERROR;
-    parseError = s;
-    return s;
+    curTok->type = TT_NONE;
+    return 1;
 }
-*/
 
-void parseExpression(void) {
+int parseExpression(void) {
+    return parseNumber();
 }
 
 void skipLineNumber(void) {
     parseNumber();
 }
 
-void parseAssignment(void) {
+int parseAssignment(void) {
     if (*cur != '=') {
         setError(cur, 2);
+        return 0;
     }
     parseSymbol();
-    parseExpression();
+    return parseExpression();
 }
 
-void parseExprList(void) {
+int parseExprOrLiteral(void) {
+    if (parseLiteral()) {
+        return 1;
+    }
+    return parseExpression();
 }
 
-void parseVarList(void) {
+int parseComma(void) {
+    if (*cur != ',') {
+        setError(cur, 4);
+        return 0;
+    }
+    parseSymbol();
+    return 1;
 }
 
-void parseStatement(void) {
+int parseVar(void) {
+    if (!parseName(0)) {
+        setError(cur, 3);
+        return 0;
+    }
+    prevTok->type = TT_VARIABLE;
+    return 1;
+}
+
+int parseVarList(void) {
+    if (!parseVar()) {
+        return 0;
+    }
+    while (*cur != 0) {
+        if (!parseComma() || !parseVar()) {
+            return 0;
+        }
+    }
+    return parseNone();
+}
+
+int parsePrintList(void) {
+    if (!parseExprOrLiteral()) {
+        return 0;
+    }
+    while (*cur != 0) {
+        if (!parseComma() || !parseExprOrLiteral()) {
+            return 0;
+        }
+    }
+    return parseNone();
+}
+
+int parseLabel(void) {
+    if (parseNumber()) {
+        return parseNone();
+    }
+    setError(cur, 8);
+    return 0;
+}
+
+int parseStatement(void);
+
+int parseConditional(void) {
+    token* thenToken;
+    char* thenPos;
+    if (!parseExpression()) {
+        return 0;
+    }
+    thenToken = curTok;
+    thenPos = cur;
+    if (!parseName(0) || !tokenNameEqual(thenToken, "THEN")) {
+        setError(thenPos, 7);
+    }
+    curTok = thenToken;
+    curTok->type = TT_ERROR;
+    return parseStatement();
+}
+
+int parseStatement(void) {
     char cmd;
     if (!parseName(1)) {
         setError(cur, 1);
     } else if (prevTok->type != TT_COMMAND) {
-        parseAssignment();
+        printf("PREV TYPE: %02X\n", prevTok->type);
+        return parseAssignment();
     }
     cmd = prevTok->body.command;
     if (cmd == CMD_REM) {
-        parseComment();
+        return parseComment();
     } else if (cmd == CMD_GOTO || cmd == CMD_GOSUB) {
-        if (parseNumber()) {
-            parseNone();
-        }
+        return parseLabel();
     } else if (cmd == CMD_RETURN || cmd == CMD_END) {
-        parseNone();
+        return parseNone();
     } else if (cmd == CMD_PRINT) {
-        parseExprList();
+        return parsePrintList();
     } else if (cmd == CMD_INPUT) {
-        parseVarList();
+        return parseVarList();
+    } else if (cmd == CMD_IF) {
+        return parseConditional();
     }
+    setError(cur, 6);
+    return 0;
 }
 
 void parseLine(char* line, void* tokens) {
@@ -213,19 +294,6 @@ void parseLine(char* line, void* tokens) {
     setError(NULL, 0);
     skipLineNumber();
     parseStatement();
-    /*
-    char* s = tokens;
-    do {
-        line = parseToken(line, tokens);
-        if (parseError != NULL) {
-            break;
-        }
-        tokens += tokenSize(tokens);
-    } while (line != NULL);
-    if (parseError == NULL) {
-        ((token*)tokens)->type = TT_NONE;
-    }
-    */
 }
 
 int tokenClass(token* t) {
@@ -242,7 +310,11 @@ int tokenNameEqual(token* t, char* s) {
     return memcmp(t->body.str.text, s, t->body.str.len) == 0;
 }
 
-char* getParseError(void) {
+char* getParseErrorPos(void) {
     return parseError;
+}
+
+char* getParseErrorMsg(void) {
+    return errorMsgs[parseErrorCode];
 }
 
