@@ -5,14 +5,26 @@
 #define TT_ERROR 0x01
 #define TT_NUMBER 0x10
 #define TT_NAME 0x20
+#define TT_COMMAND 0x21
 #define TT_SYMBOL 0x30
 #define TT_LITERAL 0x40
+#define TT_COMMENT 0x41
+
+#define CMD_PRINT 1
+#define CMD_INPUT 2
+#define CMD_IF 3
+#define CMD_GOTO 4
+#define CMD_GOSUB 5
+#define CMD_RETURN 6
+#define CMD_REM 7
+#define CMD_END 8
 
 #include "utils.h"
 
 typedef union tbody {
     short integer;
     char symbol;
+    char command;
     nstring str;
 } tbody;
 

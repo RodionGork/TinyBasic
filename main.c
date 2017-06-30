@@ -78,7 +78,9 @@ int processLine(void) {
     parseLine(line, toks);
     if (getParseError() != NULL) {
         printf("Error at pos: %d\n", (int) (getParseError() - line) + 1);
-    } else if (t->type == TT_NUMBER) {
+        return 0;
+    }
+    if (t->type == TT_NUMBER) {
         injectLine(skipSpaces(skipDigits(line)), t->body.integer);
     } else if (tokenNameEqual(t, "QUIT")) {
         return 1;
