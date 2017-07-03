@@ -13,9 +13,12 @@ char toksBody[MAX_LINE_LEN * 2];
 
 void* toks = toksBody;
 
-void readLine(void) {
-    fgets(line, sizeof(line), stdin);
+int readLine(void) {
+    if (fgets(line, sizeof(line), stdin) == NULL) {
+        return 0;
+    }
     trim(line);
+    return 1;
 }
 
 void printNStr(nstring* t) {
@@ -39,6 +42,11 @@ void printToken(token* t) {
             printNStr(&(t->body.str));
             printf("\"}");
             break;
+        case TT_FUNCTION:
+            printf("{FN \"");
+            printNStr(&(t->body.str));
+            printf("\"}");
+            break;
         case TT_COMMAND:
             printf("{CMD %d}", t->body.command);
             break;
@@ -49,6 +57,9 @@ void printToken(token* t) {
             break;
         case TT_SYMBOL:
             printf("{SYM '%c'}", t->body.symbol);
+            break;
+        case TT_FUNC_END:
+            printf("{FE %d}", t->body.symbol);
             break;
         case TT_NONE:
             printf("{NONE}");
@@ -85,6 +96,12 @@ void printProgram() {
 int processLine(void) {
     token* t = toks;
     parseLine(line, toks);
+    if (tokenNameEqual(t, "QUIT")) {
+        return 1;
+    } else if (tokenNameEqual(t, "LIST")) {
+        printProgram();
+        return 0;
+    }
     printTokens();
     if (getParseErrorPos() != NULL) {
         printf("Error '%s' at pos: %d\n", getParseErrorMsg(), (int) (getParseErrorPos() - line) + 1);
@@ -92,10 +109,6 @@ int processLine(void) {
     }
     if (t->type == TT_NUMBER) {
         injectLine(skipSpaces(skipDigits(line)), t->body.integer);
-    } else if (tokenNameEqual(t, "QUIT")) {
-        return 1;
-    } else if (tokenNameEqual(t, "LIST")) {
-        printProgram();
     }
     return 0;
 }
@@ -108,7 +121,9 @@ void init(void) {
 void dispatch(void) {
     int quit = 0;
     while (!quit) {
-        readLine();
+        if (!readLine()) {
+            break;
+        }
         quit = processLine();
     }
 }

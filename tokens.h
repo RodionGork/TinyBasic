@@ -7,7 +7,9 @@
 #define TT_NAME 0x20
 #define TT_COMMAND 0x21
 #define TT_VARIABLE 0x22
+#define TT_FUNCTION 0x23
 #define TT_SYMBOL 0x30
+#define TT_FUNC_END 0x31
 #define TT_LITERAL 0x40
 #define TT_COMMENT 0x41
 

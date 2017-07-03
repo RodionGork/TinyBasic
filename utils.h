@@ -9,6 +9,7 @@ typedef struct nstring {
 void trim(char* s);
 char* skipSpaces(char* s);
 char* skipDigits(char* s);
+int charInStr(char c, char* s);
 
 #endif
 

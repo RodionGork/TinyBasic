@@ -28,3 +28,12 @@ char* skipDigits(char* s) {
     return s;
 }
 
+int charInStr(char c, char* s) {
+    while (*s != 0) {
+        if (*s == c) {
+            return 1;
+        }
+        s++;
+    }
+    return 0;
+}
