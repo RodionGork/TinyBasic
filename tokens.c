@@ -1,9 +1,9 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 #include "tokens.h"
+#include "expr.h"
 #include "utils.h"
 
 char* cmds[] = {
@@ -39,6 +39,10 @@ token* prevTok;
 char* parseError;
 char parseErrorCode;
 
+char* getCurTokPos() {
+    return cur;
+}
+
 int tokenSize(token* t) {
     switch (t->type) {
         case TT_NUMBER:
@@ -59,7 +63,7 @@ int tokenSize(token* t) {
     return 0;
 }
 
-void setError(char* pos, char code) {
+void setTokenError(char* pos, char code) {
     parseErrorCode = code;
     parseError = pos;
     curTok->type = TT_ERROR;
@@ -67,6 +71,10 @@ void setError(char* pos, char code) {
 
 token* nextToken(void* t) {
     return t + tokenSize(t);
+}
+
+void skipTokenInInput(int skip) {
+    cur = skipSpaces(cur + skip);
 }
 
 void advance(char* s) {
@@ -167,130 +175,10 @@ void parseSymbol() {
 
 int parseNone(void) {
     if (*cur != 0) {
-        setError(cur, 5);
+        setTokenError(cur, 5);
         return 0;
     }
     curTok->type = TT_NONE;
-    return 1;
-}
-
-int parseExprUnary() {
-    if (!charInStr(*cur, "-!")) {
-        return 0;
-    }
-    parseSymbol();
-    if (prevTok->body.symbol = '-') {
-        prevTok->body.symbol = '~';
-    }
-    return 1;
-}
-
-char parseExprVal(void) {
-    if (parseNumber()) {
-        if (*cur == '(') {
-            setError(cur, 9);
-            return 'e';
-        }
-        return '+';
-    }
-    if (parseName(0)) {
-        if (*cur == '(') {
-            prevTok->type = TT_FUNCTION;
-            cur = skipSpaces(cur + 1);
-            return 'f';
-        }
-        prevTok->type = TT_VARIABLE;
-        return '+';
-    }
-    if (*cur == '(') {
-        parseSymbol();
-        return '(';
-    }
-    if (parseExprUnary()) {
-        return '1';
-    }
-    setError(cur, 9);
-    return 'e';
-}
-
-char parseExprBop(void) {
-    if (*cur == 0) {
-        parseNone();
-        return 's';
-    }
-    if (*cur == ';') {
-        return 's';
-    }
-    if (*cur == ')') {
-        return ')';
-    }
-    if (*cur == ',') {
-        return ',';
-    }
-    if (charInStr(*cur, "+-*^/%<>=&|")) {
-        parseSymbol();
-        return '1';
-    }
-    setError(cur, 9);
-    return 'e';
-}
-
-char parseExprRbr(int brCount, int argCount) {
-    if (brCount < 1) {
-        setError(cur, 9);
-        return 'e';
-    } else {
-        parseSymbol();
-        if (argCount > 0) {
-            prevTok->type = TT_FUNC_END;
-            prevTok->body.symbol = argCount;
-        }
-        return '+';
-    }
-}
-
-char parseExprComma(char inFunc) {
-    if (inFunc == 0) {
-        setError(cur, 9);
-        return 'e';
-    } else {
-        parseSymbol();
-        return '1';
-    }
-}
-
-int parseExpression(void) {
-    char funcBrackets[16];
-    char iFuncBr = 0;
-    char state = '1';
-    funcBrackets[iFuncBr] = 0;
-    while (state != 's') {
-        switch (state) {
-            case '1':
-                state = parseExprVal();
-                break;
-            case 'f':
-                funcBrackets[++iFuncBr] = 1;
-                state = '1';
-                break;
-            case '(':
-                funcBrackets[++iFuncBr] = 0;
-                state = '1';
-                break;
-            case '+':
-                state = parseExprBop();
-                break;
-            case ')':
-                state = parseExprRbr(iFuncBr, funcBrackets[iFuncBr]);
-                iFuncBr -= 1;
-                break;
-            case ',':
-                state = parseExprComma(funcBrackets[iFuncBr]++);
-                break;
-            case 'e':
-                return 0;
-        }
-    }
     return 1;
 }
 
@@ -300,7 +188,7 @@ void skipLineNumber(void) {
 
 int parseAssignment(void) {
     if (*cur != '=') {
-        setError(cur, 2);
+        setTokenError(cur, 2);
         return 0;
     }
     parseSymbol();
@@ -316,7 +204,7 @@ int parseExprOrLiteral(void) {
 
 int parseSemicolon(void) {
     if (*cur != ';') {
-        setError(cur, 4);
+        setTokenError(cur, 4);
         return 0;
     }
     parseSymbol();
@@ -325,7 +213,7 @@ int parseSemicolon(void) {
 
 int parseVar(void) {
     if (!parseName(0)) {
-        setError(cur, 3);
+        setTokenError(cur, 3);
         return 0;
     }
     prevTok->type = TT_VARIABLE;
@@ -360,7 +248,7 @@ int parseLabel(void) {
     if (parseNumber()) {
         return parseNone();
     }
-    setError(cur, 8);
+    setTokenError(cur, 8);
     return 0;
 }
 
@@ -375,7 +263,7 @@ int parseConditional(void) {
     thenToken = curTok;
     thenPos = cur;
     if (!parseName(0) || !tokenNameEqual(thenToken, "THEN")) {
-        setError(thenPos, 7);
+        setTokenError(thenPos, 7);
     }
     curTok = thenToken;
     curTok->type = TT_ERROR;
@@ -385,7 +273,7 @@ int parseConditional(void) {
 int parseStatement(void) {
     char cmd;
     if (!parseName(1)) {
-        setError(cur, 1);
+        setTokenError(cur, 1);
     } else if (prevTok->type != TT_COMMAND) {
         return parseAssignment();
     }
@@ -403,14 +291,14 @@ int parseStatement(void) {
     } else if (cmd == CMD_IF) {
         return parseConditional();
     }
-    setError(cur, 6);
+    setTokenError(cur, 6);
     return 0;
 }
 
 void parseLine(char* line, void* tokens) {
     cur = line;
     curTok = tokens;
-    setError(NULL, 0);
+    setTokenError(NULL, 0);
     skipLineNumber();
     parseStatement();
 }
