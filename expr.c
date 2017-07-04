@@ -6,8 +6,6 @@
 #include "expr.h"
 #include "editor.h"
 
-char buf[MAX_LINE_LEN * 2];
-
 int parseExprUnary() {
     if (!charInStr(*getCurTokPos(), "-!")) {
         return 0;
@@ -90,8 +88,14 @@ char parseExprComma(char inFunc) {
     }
 }
 
-token* convertToRpn(token* start) {
-    memcpy(buf, start, ((void*) curTok) - ((void*) start) + 1);
+token* convertToRpn(token* next) {
+    char buf[MAX_LINE_LEN * 2];
+    char opstack[16];
+    char sp = -1;
+    curTok->type = TT_ERROR;
+    memcpy(buf, next, ((void*) curTok) - ((void*) next) + 1);
+    curTok = next;
+    next = (void*) buf;
     return start;
 }
 
