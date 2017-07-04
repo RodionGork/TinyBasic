@@ -27,7 +27,7 @@ char* errorMsgs[] = {
     "';' expected",
     "extra characters at line end",
     "unexpected error",
-    "expected 'then' keyword",
+    "---",
     "line number expected",
     "unexpected symbol",
     
@@ -192,7 +192,7 @@ int parseAssignment(void) {
         return 0;
     }
     parseSymbol();
-    return parseExpression();
+    return parseExpression() && parseNone();
 }
 
 int parseExprOrLiteral(void) {
@@ -255,19 +255,10 @@ int parseLabel(void) {
 int parseStatement(void);
 
 int parseConditional(void) {
-    token* thenToken;
-    char* thenPos;
     if (!parseExpression()) {
         return 0;
     }
-    thenToken = curTok;
-    thenPos = cur;
-    if (!parseName(0) || !tokenNameEqual(thenToken, "THEN")) {
-        setTokenError(thenPos, 7);
-    }
-    curTok = thenToken;
-    curTok->type = TT_ERROR;
-    return parseStatement();
+    return parseSemicolon() && parseStatement();
 }
 
 int parseStatement(void) {

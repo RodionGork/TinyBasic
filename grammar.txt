@@ -1,7 +1,7 @@
 line ::= [number] statement
 
 statement ::= PRINT expr-list
-              IF expression relop expression THEN statement
+              IF expression ; statement
               GOTO number
               INPUT var-list
               LET var = expression

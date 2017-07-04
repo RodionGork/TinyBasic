@@ -1,6 +1,9 @@
 #ifndef __TOKENINT_H_
 #define __TOKENINT_H_
 
+extern token* curTok;
+extern token* prevTok;
+
 char* getCurTokPos();
 void skipTokenInInput(int skip);
 int parseName(char checkCmd);

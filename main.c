@@ -6,8 +6,6 @@
 #include "editor.h"
 #include "utils.h"
 
-#define MAX_LINE_LEN 80
-
 char line[MAX_LINE_LEN];
 char toksBody[MAX_LINE_LEN * 2];
 

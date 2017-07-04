@@ -1,9 +1,12 @@
+#include <stdlib.h>
+#include <string.h>
+
 #include "tokens.h"
 #include "tokenint.h"
 #include "expr.h"
+#include "editor.h"
 
-extern token* curTok;
-extern token* prevTok;
+char buf[MAX_LINE_LEN * 2];
 
 int parseExprUnary() {
     if (!charInStr(*getCurTokPos(), "-!")) {
@@ -45,11 +48,8 @@ char parseExprVal(void) {
 }
 
 char parseExprBop(void) {
-    if (*getCurTokPos() == 0) {
-        parseNone();
-        return 's';
-    }
-    if (*getCurTokPos() == ';') {
+    char c = *getCurTokPos();
+    if (c == 0 || c == ';') {
         return 's';
     }
     if (*getCurTokPos() == ')') {
@@ -91,6 +91,7 @@ char parseExprComma(char inFunc) {
 }
 
 token* convertToRpn(token* start) {
+    memcpy(buf, start, ((void*) curTok) - ((void*) start) + 1);
     return start;
 }
 
@@ -127,8 +128,7 @@ int parseExpression(void) {
                 return 0;
         }
     }
-    //prevTok = convertToRpn(startTok);
-    //curTok = nextToken(prevTok);
+    convertToRpn(startTok);
     return 1;
 }
 
