@@ -4,26 +4,8 @@
 
 #include "tokens.h"
 #include "editor.h"
+#include "exectoks.h"
 #include "utils.h"
-
-char line[MAX_LINE_LEN];
-char toksBody[MAX_LINE_LEN * 2];
-
-void* toks = toksBody;
-
-int readLine(void) {
-    if (fgets(line, sizeof(line), stdin) == NULL) {
-        return 0;
-    }
-    trim(line);
-    return 1;
-}
-
-void printNStr(nstring* t) {
-    for (short i = 0; i < t->len; i++) {
-        putc(t->text[i], stdout);
-    }
-};
 
 void printToken(token* t) {
     switch (t->type) {
@@ -32,17 +14,17 @@ void printToken(token* t) {
             break;
         case TT_NAME:
             printf("{NAME \"");
-            printNStr(&(t->body.str));
+            outputNStr(&(t->body.str));
             printf("\"}");
             break;
         case TT_VARIABLE:
             printf("{VAR \"");
-            printNStr(&(t->body.str));
+            outputNStr(&(t->body.str));
             printf("\"}");
             break;
         case TT_FUNCTION:
             printf("{FN \"");
-            printNStr(&(t->body.str));
+            outputNStr(&(t->body.str));
             printf("\"}");
             break;
         case TT_COMMAND:
@@ -50,7 +32,7 @@ void printToken(token* t) {
             break;
         case TT_LITERAL:
             printf("{STR \"");
-            printNStr(&(t->body.str));
+            outputNStr(&(t->body.str));
             printf("\"}");
             break;
         case TT_SYMBOL:
@@ -67,7 +49,7 @@ void printToken(token* t) {
     }
 }
 
-void printTokens(void) {
+void printTokens(token* toks) {
     void* t = toks;
     while (1) {
         printToken(t);
@@ -84,22 +66,31 @@ void printProgram() {
     prgline* p = findLine(1);
     while (p->num != 0) {
         printf("%d ", p->num);
-        printNStr(&(p->str));
+        outputNStr(&(p->str));
         printf("\n");
         p = findLine(p->num + 1);
     }
 }
 
-int processLine(void) {
-    token* t = toks;
-    parseLine(line, toks);
+int directExecute(token* t) {
     if (tokenNameEqual(t, "QUIT")) {
         return 1;
     } else if (tokenNameEqual(t, "LIST")) {
         printProgram();
         return 0;
     }
-    printTokens();
+    executeTokens(t);
+    return 0;
+}
+
+int processLine(char* line) {
+    char toksBody[MAX_LINE_LEN * 2];
+    token* t = (void*) toksBody;
+    parseLine(line, t);
+    if (t->type != TT_NUMBER) {
+        return directExecute(t);
+    }
+    printTokens(t);
     if (getParseErrorPos() != NULL) {
         printf("Error '%s' at pos: %d\n", getParseErrorMsg(), (int) (getParseErrorPos() - line) + 1);
         return 0;
@@ -116,12 +107,13 @@ void init(void) {
 }
 
 void dispatch(void) {
+    char line[MAX_LINE_LEN];
     int quit = 0;
     while (!quit) {
-        if (!readLine()) {
+        if (!readLine(line)) {
             break;
         }
-        quit = processLine();
+        quit = processLine(line);
     }
 }
 

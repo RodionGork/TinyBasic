@@ -13,14 +13,15 @@
 #define TT_LITERAL 0x40
 #define TT_COMMENT 0x41
 
+#define CMD_REM 0
 #define CMD_PRINT 1
 #define CMD_INPUT 2
 #define CMD_IF 3
 #define CMD_GOTO 4
 #define CMD_GOSUB 5
 #define CMD_RETURN 6
-#define CMD_REM 7
-#define CMD_END 8
+#define CMD_END 0
+
 
 #include "utils.h"
 
@@ -38,6 +39,7 @@ typedef struct token {
 
 void parseLine(char* line, void* tokens);
 int tokenSize(token* t);
+token* nextToken(void* t);
 void copyToken(void* dst, void* src);
 int tokenClass(token* t);
 int tokenNameEqual(token* t, char* s);

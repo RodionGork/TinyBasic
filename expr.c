@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 #include "tokens.h"
 #include "tokenint.h"
@@ -12,7 +11,7 @@ int parseExprUnary() {
         return 0;
     }
     parseSymbol();
-    if (prevTok->body.symbol = '-') {
+    if (prevTok->body.symbol == '-') {
         prevTok->body.symbol = '~';
     }
     return 1;
@@ -116,6 +115,10 @@ char operatorPriority(char op) {
     }
 }
 
+char isUnary(char op) {
+    return op == '!' || op == '~';
+}
+
 char convertRpnPop(char op) {
     if (op == '(') {
         return 0;
@@ -147,6 +150,9 @@ void shuntingYard(token* next) {
                 }
             } else {
                 prio = operatorPriority(op);
+                if (isUnary(op)) {
+                    prio += 1;
+                }
                 while (sp >= 0 && operatorPriority(opstack[sp]) >= prio) {
                     convertRpnPop(opstack[sp--]);
                 }
@@ -159,8 +165,6 @@ void shuntingYard(token* next) {
             while (convertRpnPop(opstack[sp--]));
             copyToken(curTok, start + opstack[sp--]);
             curTok = nextToken(curTok);
-        } else {
-            printf("UNKNOWN TYPE: %d\n", next->type);
         }
         next = nextToken(next);
     }

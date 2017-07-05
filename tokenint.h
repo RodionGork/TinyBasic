@@ -10,7 +10,6 @@ int parseName(char checkCmd);
 int parseSymbol(void);
 int parseNumber(void);
 int parseNone();
-token* nextToken(void* t);
 void setTokenError(char* pos, char code);
 
 #endif

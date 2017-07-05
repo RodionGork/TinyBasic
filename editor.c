@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "editor.h"
+#include "utils.h"
 
 
 char prgBody[MAX_PRG_SIZE];
@@ -10,6 +11,14 @@ short prgSize;
 void initEditor(void) {
     ((prgline*)prg)->num = 0;
     prgSize = 2;
+}
+
+int readLine(char* line) {
+    if (!input(line, MAX_LINE_LEN)) {
+        return 0;
+    }
+    trim(line);
+    return 1;
 }
 
 int lineSize(prgline* p) {

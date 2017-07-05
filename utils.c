@@ -1,4 +1,7 @@
 #include <ctype.h>
+#include <stdio.h>
+
+#include "utils.h"
 
 void trim(char* s) {
     int i = 0, k;
@@ -37,3 +40,26 @@ int charInStr(char c, char* s) {
     }
     return 0;
 }
+
+int input(char* s, int n) {
+    return fgets(s, n, stdin) != NULL;
+}
+
+void outputStr(char* s) {
+    printf("%s", s);
+}
+
+void outputNStr(nstring* t) {
+    for (short i = 0; i < t->len; i++) {
+        putc(t->text[i], stdout);
+    }
+};
+
+void outputInt(int n) {
+    printf("%d", n);
+}
+
+void outputCr() {
+    printf("\n");
+}
+

@@ -10,6 +10,11 @@ void trim(char* s);
 char* skipSpaces(char* s);
 char* skipDigits(char* s);
 int charInStr(char c, char* s);
+int input(char* s, int n);
+void outputStr(char* s);
+void outputNStr(nstring* s);
+void outputInt(int n);
+void outputCr();
 
 #endif
 
