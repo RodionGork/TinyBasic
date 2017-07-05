@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "tokens.h"
 #include "tokenint.h"
@@ -88,15 +89,95 @@ char parseExprComma(char inFunc) {
     }
 }
 
-token* convertToRpn(token* next) {
-    char buf[MAX_LINE_LEN * 2];
+char operatorPriority(char op) {
+    switch (op) {
+        case '&':
+        case '|':
+            return 5;
+        case '<':
+        case '>':
+        case '=':
+        case '#':
+        case '{':
+        case '}':
+            return 10;
+        case '+':
+        case '-':
+            return 15;
+        case '*':
+        case '/':
+        case '%':
+            return 20;
+        case '!':
+        case '~':
+            return 25;
+        case '(':
+            return 0;
+    }
+}
+
+char convertRpnPop(char op) {
+    if (op == '(') {
+        return 0;
+    }
+    curTok->type = TT_SYMBOL;
+    curTok->body.symbol = op;
+    curTok = nextToken(curTok);
+    return 1;
+}
+
+void shuntingYard(token* next) {
     char opstack[16];
     char sp = -1;
+    char prio;
+    char op;
+    void* start = next;
+    while (next->type != TT_ERROR) {
+        if (next->type == TT_VARIABLE || next->type == TT_NUMBER) {
+            copyToken(curTok, next);
+            curTok = nextToken(curTok);
+        } else if (next->type == TT_SYMBOL) {
+            op = next->body.symbol;
+            if (op == '(') {
+                opstack[++sp] = '(';
+            } else if (op == ')' || op == ',') {
+                while (convertRpnPop(opstack[sp--]));
+                if (op == ',') {
+                    sp++;
+                }
+            } else {
+                prio = operatorPriority(op);
+                while (sp >= 0 && operatorPriority(opstack[sp]) >= prio) {
+                    convertRpnPop(opstack[sp--]);
+                }
+                opstack[++sp] = op;
+            }
+        } else if (next->type == TT_FUNCTION) {
+            opstack[++sp] = (char)(((void*)next) - start);
+            opstack[++sp] = '(';
+        } else if (next->type == TT_FUNC_END) {
+            while (convertRpnPop(opstack[sp--]));
+            copyToken(curTok, start + opstack[sp--]);
+            curTok = nextToken(curTok);
+        } else {
+            printf("UNKNOWN TYPE: %d\n", next->type);
+        }
+        next = nextToken(next);
+    }
+    while (sp >= 0) {
+        convertRpnPop(opstack[sp--]);
+    }
+}
+
+void convertToRpn(token* next) {
+    char buf[MAX_LINE_LEN * 2];
     curTok->type = TT_ERROR;
     memcpy(buf, next, ((void*) curTok) - ((void*) next) + 1);
     curTok = next;
     next = (void*) buf;
-    return start;
+    shuntingYard(next);
+    curTok->type = TT_ERROR;
+    prevTok = NULL;
 }
 
 int parseExpression(void) {

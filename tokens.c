@@ -63,6 +63,10 @@ int tokenSize(token* t) {
     return 0;
 }
 
+void copyToken(void* dst, void* src) {
+    memcpy(dst, src, tokenSize(src));
+}
+
 void setTokenError(char* pos, char code) {
     parseErrorCode = code;
     parseError = pos;
@@ -157,7 +161,7 @@ void parseSymbol() {
     char c = 0;
     if (cur[0] == '<') {
         if (cur[1] == '>') {
-            c = '!';
+            c = '#';
         } else if (cur[1] == '=') {
             c = '{';
         }

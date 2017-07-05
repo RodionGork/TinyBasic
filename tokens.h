@@ -38,6 +38,7 @@ typedef struct token {
 
 void parseLine(char* line, void* tokens);
 int tokenSize(token* t);
+void copyToken(void* dst, void* src);
 int tokenClass(token* t);
 int tokenNameEqual(token* t, char* s);
 char* getParseErrorPos(void);

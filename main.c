@@ -75,7 +75,6 @@ void printTokens(void) {
         if (tokenClass(t) == TT_NONE) {
             break;
         }
-        printf("tt%02x ", ((token*)t)->type);
         t += tokenSize(t);
     }
     printf("\n");
