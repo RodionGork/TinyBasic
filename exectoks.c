@@ -76,15 +76,12 @@ short calcExpression(void) {
     while (1) {
         switch (cur->type) {
             case TT_NONE:
+            case TT_SEPARATOR:
                 return calcStack[sp];
             case TT_NUMBER:
                 calcStack[++sp] = cur->body.integer;
                 break;
             case TT_SYMBOL:
-                if (cur->body.symbol == ';') {
-                    advanceExecutor();
-                    return calcStack[sp];
-                }
                 calcOperation(cur->body.symbol);
                 break;
         }
@@ -98,6 +95,8 @@ void execPrint(void) {
             case TT_NONE:
                 outputCr();
                 return;
+            case TT_SEPARATOR:
+                break;
             case TT_LITERAL:
                 outputNStr(&(cur->body.str));
                 break;

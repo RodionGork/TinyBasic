@@ -44,8 +44,12 @@ void printToken(token* t) {
         case TT_NONE:
             printf("{NONE}");
             break;
+        case TT_SEPARATOR:
+            printf("{SEP}");
+            break;
         default:
             printf("{ERROR}");
+            break;
     }
 }
 
@@ -79,6 +83,7 @@ int directExecute(token* t) {
         printProgram();
         return 0;
     }
+    //printTokens(t);
     executeTokens(t);
     return 0;
 }
@@ -90,7 +95,7 @@ int processLine(char* line) {
     if (t->type != TT_NUMBER) {
         return directExecute(t);
     }
-    printTokens(t);
+    //printTokens(t);
     if (getParseErrorPos() != NULL) {
         printf("Error '%s' at pos: %d\n", getParseErrorMsg(), (int) (getParseErrorPos() - line) + 1);
         return 0;

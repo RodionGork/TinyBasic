@@ -58,6 +58,7 @@ int tokenSize(token* t) {
             return 1 + sizeof(t->body.symbol);
         case TT_NONE:
         case TT_ERROR:
+        case TT_SEPARATOR:
             return 1;
     }
     return 0;
@@ -211,7 +212,8 @@ int parseSemicolon(void) {
         setTokenError(cur, 4);
         return 0;
     }
-    parseSymbol();
+    curTok->type = TT_SEPARATOR;
+    advance(cur + 1);
     return 1;
 }
 
