@@ -76,15 +76,14 @@ void printProgram() {
     }
 }
 
-int directExecute(token* t) {
+int metaOrError(token* t, char* line) {
     if (tokenNameEqual(t, "QUIT")) {
         return 1;
     } else if (tokenNameEqual(t, "LIST")) {
         printProgram();
-        return 0;
+    } else {
+        printf("%s (%d)\n", getParseErrorMsg(), (int) (getParseErrorPos() - line) + 1);
     }
-    //printTokens(t);
-    executeTokens(t);
     return 0;
 }
 
@@ -92,15 +91,13 @@ int processLine(char* line) {
     char toksBody[MAX_LINE_LEN * 2];
     token* t = (void*) toksBody;
     parseLine(line, t);
-    if (t->type != TT_NUMBER) {
-        return directExecute(t);
-    }
     //printTokens(t);
     if (getParseErrorPos() != NULL) {
-        printf("Error '%s' at pos: %d\n", getParseErrorMsg(), (int) (getParseErrorPos() - line) + 1);
-        return 0;
+        return metaOrError(t, line);
     }
-    if (t->type == TT_NUMBER) {
+    if (t->type != TT_NUMBER) {
+        executeTokens(t);
+    } else {
         injectLine(skipSpaces(skipDigits(line)), t->body.integer);
     }
     return 0;
