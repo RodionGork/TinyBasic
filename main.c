@@ -103,9 +103,9 @@ int processLine(char* line) {
     return 0;
 }
 
-void init(void) {
+void init(void* prgBody) {
     printf("\nTinyBasic 0.1-PoC\n\n");
-    initEditor();
+    initEditor(prgBody);
 }
 
 void dispatch(void) {
@@ -120,7 +120,8 @@ void dispatch(void) {
 }
 
 int main(void) {
-    init();
+    char prgBody[MAX_PRG_SIZE];
+    init(prgBody);
     dispatch();
     return 0;
 }

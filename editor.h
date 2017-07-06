@@ -11,7 +11,7 @@ typedef struct prgline {
     nstring str;
 } __attribute__((packed)) prgline;
 
-void initEditor(void);
+void initEditor(void* prgBody);
 int readLine(char* line);
 prgline* findLine(int num);
 void injectLine(char* s, int num);

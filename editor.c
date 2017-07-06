@@ -3,12 +3,11 @@
 #include "editor.h"
 #include "utils.h"
 
-
-char prgBody[MAX_PRG_SIZE];
-void* prg = prgBody;
+void* prg;
 short prgSize;
 
-void initEditor(void) {
+void initEditor(void* prgBody) {
+    prg = prgBody;
     ((prgline*)prg)->num = 0;
     prgSize = 2;
 }

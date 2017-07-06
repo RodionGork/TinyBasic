@@ -13,16 +13,21 @@ typedef struct varHolder {
 
 token* cur;
 short* calcStack;
+short nextLineNum = 0;
 char sp;
 
 void execRem(void);
 void execPrint(void);
 void execInput(void);
+void execIf(void);
+void execGoto(void);
 
 void (*executors[])(void) = {
     execRem,
     execPrint,
     execInput,
+    execIf,
+    execGoto,
 };
 
 varHolder vars[MAX_VARS];
@@ -154,22 +159,7 @@ void execAssignment(void) {
     setVar(varname, calcExpression());
 }
 
-void execInput(void) {
-    char s[16];
-    while (1) {
-        switch (cur->type) {
-            case TT_NONE:
-                return;
-            case TT_SEPARATOR:
-                break;
-            case TT_VARIABLE:
-                outputStr("? ");
-                input(s, sizeof(s));
-                setVar(shortVarName(&(cur->body.str)), atoi(s));
-                break;
-        }
-        advanceExecutor();
-    }
+void execRem(void) {
 }
 
 void execPrint(void) {
@@ -191,18 +181,51 @@ void execPrint(void) {
     }
 }
 
-void execRem(void) {
+void execInput(void) {
+    char s[16];
+    while (1) {
+        switch (cur->type) {
+            case TT_NONE:
+                return;
+            case TT_SEPARATOR:
+                break;
+            case TT_VARIABLE:
+                outputStr("? ");
+                input(s, sizeof(s));
+                setVar(shortVarName(&(cur->body.str)), atoi(s));
+                break;
+        }
+        advanceExecutor();
+    }
+}
+
+void execIf(void) {
+    if (calcExpression() == 0) {
+        while (cur->type != TT_NONE) {
+            advanceExecutor();
+        }
+    } else {
+        advanceExecutor();
+    }
+}
+
+void execGoto(void) {
+    nextLineNum = cur->body.integer;
+    advanceExecutor();
 }
 
 int executeTokens(token* t) {
     short stackBody[16];
     calcStack = stackBody;
     cur = t;
-    if (t->type == TT_COMMAND) {
-        advanceExecutor();
-        executors[t->body.command]();
-    } else {
-        execAssignment();
+    while (t->type != TT_NONE) {
+        if (t->type == TT_COMMAND) {
+            advanceExecutor();
+            executors[t->body.command]();
+        } else {
+            execAssignment();
+        }
+        t = cur;
     }
 }
 
