@@ -273,12 +273,24 @@ int parseConditional(void) {
     return parseSemicolon() && parseStatement();
 }
 
+void parseSpecialWithError() {
+    curTok = nextToken(curTok);
+    while (parseName(0) || parseNumber() || parseLiteral()) {
+    }
+    curTok->type = TT_ERROR;
+}
+
 int parseStatement(void) {
     char cmd;
     if (!parseName(1)) {
         setTokenError(cur, 1);
     } else if (prevTok->type != TT_COMMAND) {
-        return parseAssignment();
+        if (parseAssignment()) {
+            return 1;
+        } else {
+            parseSpecialWithError();
+            return 0;
+        }
     }
     cmd = prevTok->body.command;
     if (cmd == CMD_REM) {
@@ -294,9 +306,6 @@ int parseStatement(void) {
     } else if (cmd == CMD_IF) {
         return parseConditional();
     }
-    outputStr("Blaaa ");
-    outputInt(cmd);
-    outputCr();
     setTokenError(cur, 6);
     return 0;
 }
@@ -304,6 +313,7 @@ int parseStatement(void) {
 void parseLine(char* line, void* tokens) {
     cur = line;
     curTok = tokens;
+    prevTok = NULL;
     setTokenError(NULL, 0);
     if (parseLineNumber()) {
         parseStatement();

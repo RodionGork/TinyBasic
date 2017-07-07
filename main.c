@@ -6,6 +6,8 @@
 #include "exectoks.h"
 #include "utils.h"
 
+short listLine, listPage;
+
 void printToken(token* t) {
     switch (t->type) {
         case TT_NUMBER:
@@ -71,22 +73,40 @@ void printTokens(token* toks) {
     outputCr();
 }
 
-void printProgram() {
-    prgline* p = findLine(1);
-    while (p->num != 0) {
+void printProgram(void) {
+    prgline* p = findLine(listLine);
+    if (p->num == 0 && listLine > 1) {
+        p = findLine(1);
+    }
+    short lineCount = 0;
+    while (p->num != 0 && lineCount < listPage) {
+        listLine = p->num + 1;
         outputInt(p->num);
         outputChar(' ');
         outputNStr(&(p->str));
         outputCr();
         p = findLine(p->num + 1);
+        lineCount += 1;
     }
+}
+
+void listProgram(token* t) {
+    t = nextToken(nextToken(t));
+    if (t->type == TT_NUMBER) {
+        listLine = t->body.integer;
+        t = nextToken(t);
+        if (t->type == TT_NUMBER) {
+            listPage = t->body.integer;
+        }
+    }
+    printProgram();
 }
 
 int metaOrError(token* t, char* line) {
     if (tokenNameEqual(t, "QUIT")) {
         return 1;
     } else if (tokenNameEqual(t, "LIST")) {
-        printProgram();
+        listProgram(t);
     } else if (tokenNameEqual(t, "STEP")) {
         executeStep(line, t);
     } else {
@@ -118,6 +138,8 @@ void init(void* space, int dataSize) {
     outputStr("\nTinyBasic 0.1-PoC\n\n");
     initEditor(space + dataSize);
     initTokenExecutor(space, dataSize);
+    listLine = 1;
+    listPage = 3;
 }
 
 void dispatch(void) {
