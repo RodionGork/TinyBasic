@@ -102,13 +102,26 @@ void listProgram(token* t) {
     printProgram();
 }
 
+void executeSteps(char* lineBody, token* tokensBody) {
+    token* t = nextToken(nextToken(tokensBody));
+    short cnt = 1;
+    if (t->type == TT_NUMBER) {
+        cnt = t->body.integer;
+    }
+    while (cnt-- > 0) {
+        if(executeStep(lineBody, tokensBody)) {
+            break;
+        }
+    }
+}
+
 int metaOrError(token* t, char* line) {
     if (tokenNameEqual(t, "QUIT")) {
         return 1;
     } else if (tokenNameEqual(t, "LIST")) {
         listProgram(t);
     } else if (tokenNameEqual(t, "STEP")) {
-        executeStep(line, t);
+        executeSteps(line, t);
     } else {
         outputStr(getParseErrorMsg());
         outputStr(" (");
@@ -121,6 +134,9 @@ int metaOrError(token* t, char* line) {
 int processLine(char* line) {
     char toksBody[MAX_LINE_LEN * 2];
     token* t = (void*) toksBody;
+    if (line[0] == 0) {
+        return 0;
+    }
     parseLine(line, t);
     //printTokens(t);
     if (getParseErrorPos() != NULL) {

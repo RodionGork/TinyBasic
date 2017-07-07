@@ -284,6 +284,7 @@ int parseStatement(void) {
     char cmd;
     if (!parseName(1)) {
         setTokenError(cur, 1);
+        return 0;
     } else if (prevTok->type != TT_COMMAND) {
         if (parseAssignment()) {
             return 1;
