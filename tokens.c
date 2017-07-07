@@ -7,14 +7,13 @@
 #include "utils.h"
 
 char* cmds[] = {
-    "-nocmd-",
+    "REM",
     "PRINT",
     "INPUT",
     "IF",
     "GOTO",
     "GOSUB",
     "RETURN",
-    "REM",
     "END",
     ""
 };
@@ -27,7 +26,7 @@ char* errorMsgs[] = {
     "';' expected",
     "extra characters at line end",
     "unexpected error",
-    "---",
+    "linenum out of range",
     "line number expected",
     "unexpected symbol",
     
@@ -48,6 +47,7 @@ int tokenSize(token* t) {
         case TT_NUMBER:
             return 1 + sizeof(t->body.integer);
         case TT_NAME:
+        case TT_COMMENT:
         case TT_LITERAL:
         case TT_FUNCTION:
         case TT_VARIABLE:
@@ -88,17 +88,15 @@ void advance(char* s) {
     curTok = nextToken(curTok);
 }
 
-int trySubstCmd(void) {
+void trySubstCmd(void) {
     short i = 0;
     for (i = 0; cmds[i][0] != 0; i++) {
         if (tokenNameEqual(curTok, cmds[i])) {
             curTok->type = TT_COMMAND;
             curTok->body.command = i;
             nextToken(curTok)->type = TT_ERROR;
-            return i;
         }
     }
-    return 0;
 }
 
 int parseName(char checkCmd) {
@@ -133,13 +131,22 @@ int parseNumber(void) {
     return 1;
 }
 
+int parseNone(void) {
+    if (*cur != 0) {
+        setTokenError(cur, 5);
+        return 0;
+    }
+    curTok->type = TT_NONE;
+    return 1;
+}
+
 int parseComment(void) {
     unsigned char len = strlen(cur);
-    curTok->type == TT_COMMENT;
+    curTok->type = TT_COMMENT;
     curTok->body.str.len = len;
     memcpy(&(curTok->body.str.text), cur, len);
     advance(cur + len);
-    return 1;
+    return parseNone();
 }
 
 int parseLiteral() {
@@ -178,17 +185,16 @@ void parseSymbol() {
     advance(cur + 1);
 }
 
-int parseNone(void) {
-    if (*cur != 0) {
-        setTokenError(cur, 5);
+int parseLineNumber(void) {
+    char* start = cur;
+    if (!parseNumber()) {
+        return 1;
+    }
+    if (prevTok->body.integer < 1 || prevTok->body.integer > MAX_LINE_NUMBER) {
+        setTokenError(start, 7);
         return 0;
     }
-    curTok->type = TT_NONE;
     return 1;
-}
-
-void skipLineNumber(void) {
-    parseNumber();
 }
 
 int parseAssignment(void) {
@@ -288,6 +294,9 @@ int parseStatement(void) {
     } else if (cmd == CMD_IF) {
         return parseConditional();
     }
+    outputStr("Blaaa ");
+    outputInt(cmd);
+    outputCr();
     setTokenError(cur, 6);
     return 0;
 }
@@ -296,8 +305,9 @@ void parseLine(char* line, void* tokens) {
     cur = line;
     curTok = tokens;
     setTokenError(NULL, 0);
-    skipLineNumber();
-    parseStatement();
+    if (parseLineNumber()) {
+        parseStatement();
+    }
 }
 
 int tokenClass(token* t) {

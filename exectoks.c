@@ -2,9 +2,8 @@
 #include <string.h>
 
 #include "tokens.h"
+#include "editor.h"
 #include "utils.h"
-
-#define MAX_VARS 40
 
 typedef struct varHolder {
     short name;
@@ -13,14 +12,17 @@ typedef struct varHolder {
 
 token* cur;
 short* calcStack;
-short nextLineNum = 0;
-char sp;
+short nextLineNum = 1;
+short sp;
 
 void execRem(void);
 void execPrint(void);
 void execInput(void);
 void execIf(void);
 void execGoto(void);
+void execGosub(void);
+void execReturn(void);
+void execEnd(void);
 
 void (*executors[])(void) = {
     execRem,
@@ -28,11 +30,21 @@ void (*executors[])(void) = {
     execInput,
     execIf,
     execGoto,
+    execGosub,
+    execReturn,
+    execEnd,
 };
 
-varHolder vars[MAX_VARS];
+varHolder* vars;
 
 char numVars = 0;
+
+void initTokenExecutor(void* space, int size) {
+    numVars = 0;
+    sp = (size / sizeof(*calcStack));
+    vars = space;
+    calcStack = space;
+}
 
 short shortVarName(nstring* name) {
     short n = name->text[0];
@@ -81,7 +93,7 @@ void advanceExecutor(void) {
 }
 
 void calcOperation(char op) {
-    short top = calcStack[sp--];
+    short top = calcStack[sp++];
     switch (op) {
         case '+':
             calcStack[sp] += top;
@@ -99,10 +111,10 @@ void calcOperation(char op) {
             calcStack[sp] %= top;
             break;
         case '~':
-            calcStack[++sp] = -top;
+            calcStack[--sp] = -top;
             break;
         case '!':
-            calcStack[++sp] = !top;
+            calcStack[--sp] = !top;
             break;
         case '<':
             calcStack[sp] = calcStack[sp] < top;
@@ -132,17 +144,16 @@ void calcOperation(char op) {
 }
 
 short calcExpression(void) {
-    sp = -1;
     while (1) {
         switch (cur->type) {
             case TT_NONE:
             case TT_SEPARATOR:
-                return calcStack[sp];
+                return calcStack[sp++];
             case TT_NUMBER:
-                calcStack[++sp] = cur->body.integer;
+                calcStack[--sp] = cur->body.integer;
                 break;
             case TT_VARIABLE:
-                calcStack[++sp] = getVar(shortVarName(&(cur->body.str)));
+                calcStack[--sp] = getVar(shortVarName(&(cur->body.str)));
                 break;
             case TT_SYMBOL:
                 calcOperation(cur->body.symbol);
@@ -160,6 +171,9 @@ void execAssignment(void) {
 }
 
 void execRem(void) {
+    while (cur->type != TT_NONE) {
+        advanceExecutor();
+    }
 }
 
 void execPrint(void) {
@@ -214,9 +228,21 @@ void execGoto(void) {
     advanceExecutor();
 }
 
+void execGosub(void) {
+    calcStack[--sp] = nextLineNum;
+    nextLineNum = cur->body.integer;
+    advanceExecutor();
+}
+
+void execReturn(void) {
+    nextLineNum = calcStack[sp++];
+}
+
+void execEnd(void) {
+    nextLineNum = 32767;
+}
+
 int executeTokens(token* t) {
-    short stackBody[16];
-    calcStack = stackBody;
     cur = t;
     while (t->type != TT_NONE) {
         if (t->type == TT_COMMAND) {
@@ -227,5 +253,19 @@ int executeTokens(token* t) {
         }
         t = cur;
     }
+}
+
+int executeStep(char* lineBuf, token* tokenBuf) {
+    prgline* p = findLine(nextLineNum);
+    if (p->num == 0) {
+        outputStr("End of code\n");
+        return 1;
+    }
+    nextLineNum = p->num + 1;
+    memcpy(lineBuf, p->str.text, p->str.len);
+    lineBuf[p->str.len] = 0;
+    parseLine(lineBuf, tokenBuf);
+    executeTokens(tokenBuf);
+    return 0;
 }
 

@@ -3,7 +3,6 @@
 
 #include "utils.h"
 
-#define MAX_PRG_SIZE 4096
 #define MAX_LINE_LEN 80
 
 typedef struct prgline {

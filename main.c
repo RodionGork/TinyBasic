@@ -33,6 +33,11 @@ void printToken(token* t) {
             outputNStr(&(t->body.str));
             outputStr("\"");
             break;
+        case TT_COMMENT:
+            outputStr("REM=\"");
+            outputNStr(&(t->body.str));
+            outputStr("\"");
+            break;
         case TT_SYMBOL:
             outputStr("SYM=");
             outputChar(t->body.symbol);
@@ -82,6 +87,8 @@ int metaOrError(token* t, char* line) {
         return 1;
     } else if (tokenNameEqual(t, "LIST")) {
         printProgram();
+    } else if (tokenNameEqual(t, "STEP")) {
+        executeStep(line, t);
     } else {
         outputStr(getParseErrorMsg());
         outputStr(" (");
@@ -107,9 +114,10 @@ int processLine(char* line) {
     return 0;
 }
 
-void init(void* prgBody) {
+void init(void* space, int dataSize) {
     outputStr("\nTinyBasic 0.1-PoC\n\n");
-    initEditor(prgBody);
+    initEditor(space + dataSize);
+    initTokenExecutor(space, dataSize);
 }
 
 void dispatch(void) {
@@ -124,8 +132,8 @@ void dispatch(void) {
 }
 
 int main(void) {
-    char prgBody[MAX_PRG_SIZE];
-    init(prgBody);
+    char dataSpace[4096];
+    init(dataSpace, 512);
     dispatch();
     return 0;
 }

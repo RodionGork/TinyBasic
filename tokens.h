@@ -21,8 +21,9 @@
 #define CMD_GOTO 4
 #define CMD_GOSUB 5
 #define CMD_RETURN 6
-#define CMD_END 0
+#define CMD_END 7
 
+#define MAX_LINE_NUMBER 30000
 
 #include "utils.h"
 
