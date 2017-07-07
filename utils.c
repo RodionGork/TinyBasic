@@ -45,6 +45,10 @@ int input(char* s, int n) {
     return fgets(s, n, stdin) != NULL;
 }
 
+void outputChar(char c) {
+    putc(c, stdout);
+}
+
 void outputStr(char* s) {
     printf("%s", s);
 }

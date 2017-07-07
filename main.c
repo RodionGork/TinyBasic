@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -10,45 +9,46 @@
 void printToken(token* t) {
     switch (t->type) {
         case TT_NUMBER:
-            printf("{INT %d}", t->body.integer);
+            outputStr("INT=");
+            outputInt(t->body.integer);
             break;
         case TT_NAME:
-            printf("{NAME \"");
+            outputStr("NAME=");
             outputNStr(&(t->body.str));
-            printf("\"}");
             break;
         case TT_VARIABLE:
-            printf("{VAR \"");
+            outputStr("VAR=");
             outputNStr(&(t->body.str));
-            printf("\"}");
             break;
         case TT_FUNCTION:
-            printf("{FN \"");
+            outputStr("FN=");
             outputNStr(&(t->body.str));
-            printf("\"}");
             break;
         case TT_COMMAND:
-            printf("{CMD %d}", t->body.command);
+            outputStr("CMD=");
+            outputInt(t->body.command);
             break;
         case TT_LITERAL:
-            printf("{STR \"");
+            outputStr("STR=\"");
             outputNStr(&(t->body.str));
-            printf("\"}");
+            outputStr("\"");
             break;
         case TT_SYMBOL:
-            printf("{SYM '%c'}", t->body.symbol);
+            outputStr("SYM=");
+            outputChar(t->body.symbol);
             break;
         case TT_FUNC_END:
-            printf("{FE %d}", t->body.symbol);
+            outputStr("FE=%d");
+            outputInt(t->body.symbol);
             break;
         case TT_NONE:
-            printf("{NONE}");
+            outputChar('N');
             break;
         case TT_SEPARATOR:
-            printf("{SEP}");
+            outputChar(';');
             break;
         default:
-            printf("{ERROR}");
+            outputChar('E');
             break;
     }
 }
@@ -57,21 +57,22 @@ void printTokens(token* toks) {
     void* t = toks;
     while (1) {
         printToken(t);
-        printf(" ");
+        outputChar(' ');
         if (tokenClass(t) == TT_NONE) {
             break;
         }
         t += tokenSize(t);
     }
-    printf("\n");
+    outputCr();
 }
 
 void printProgram() {
     prgline* p = findLine(1);
     while (p->num != 0) {
-        printf("%d ", p->num);
+        outputInt(p->num);
+        outputChar(' ');
         outputNStr(&(p->str));
-        printf("\n");
+        outputCr();
         p = findLine(p->num + 1);
     }
 }
@@ -82,7 +83,10 @@ int metaOrError(token* t, char* line) {
     } else if (tokenNameEqual(t, "LIST")) {
         printProgram();
     } else {
-        printf("%s (%d)\n", getParseErrorMsg(), (int) (getParseErrorPos() - line) + 1);
+        outputStr(getParseErrorMsg());
+        outputStr(" (");
+        outputInt((int)(getParseErrorPos() - line) + 1);
+        outputStr(")\n");
     }
     return 0;
 }
@@ -104,7 +108,7 @@ int processLine(char* line) {
 }
 
 void init(void* prgBody) {
-    printf("\nTinyBasic 0.1-PoC\n\n");
+    outputStr("\nTinyBasic 0.1-PoC\n\n");
     initEditor(prgBody);
 }
 
