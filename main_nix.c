@@ -14,7 +14,7 @@ short adcread(char channel) {
     return 0;
 }
 
-short pinread(char pin) {
+char pinread(char pin) {
     return 0;
 }
 

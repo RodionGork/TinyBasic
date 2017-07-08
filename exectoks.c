@@ -10,7 +10,7 @@ typedef struct varHolder {
     short value;
 } __attribute__((packed)) varHolder;
 
-token* cur;
+token* tcur;
 short* calcStack;
 short nextLineNum = 1;
 short sp;
@@ -87,8 +87,8 @@ void setVar(short name, short value) {
 }
 
 void advanceExecutor(void) {
-    if (cur->type != TT_NONE) {
-        cur = nextToken(cur);
+    if (tcur->type != TT_NONE) {
+        tcur = nextToken(tcur);
     }
 }
 
@@ -157,21 +157,21 @@ void calcFunction(nstring* name) {
 
 short calcExpression(void) {
     while (1) {
-        switch (cur->type) {
+        switch (tcur->type) {
             case TT_NONE:
             case TT_SEPARATOR:
                 return calcStack[sp++];
             case TT_NUMBER:
-                calcStack[--sp] = cur->body.integer;
+                calcStack[--sp] = tcur->body.integer;
                 break;
             case TT_VARIABLE:
-                calcStack[--sp] = getVar(shortVarName(&(cur->body.str)));
+                calcStack[--sp] = getVar(shortVarName(&(tcur->body.str)));
                 break;
             case TT_SYMBOL:
-                calcOperation(cur->body.symbol);
+                calcOperation(tcur->body.symbol);
                 break;
             case TT_FUNCTION:
-                calcFunction(&(cur->body.str));
+                calcFunction(&(tcur->body.str));
                 break;
         }
         advanceExecutor();
@@ -179,28 +179,28 @@ short calcExpression(void) {
 }
 
 void execAssignment(void) {
-    short varname = shortVarName(&(cur->body.str));
+    short varname = shortVarName(&(tcur->body.str));
     advanceExecutor();
     advanceExecutor();
     setVar(varname, calcExpression());
 }
 
 void execRem(void) {
-    while (cur->type != TT_NONE) {
+    while (tcur->type != TT_NONE) {
         advanceExecutor();
     }
 }
 
 void execPrint(void) {
     while (1) {
-        switch (cur->type) {
+        switch (tcur->type) {
             case TT_NONE:
                 outputCr();
                 return;
             case TT_SEPARATOR:
                 break;
             case TT_LITERAL:
-                outputNStr(&(cur->body.str));
+                outputNStr(&(tcur->body.str));
                 break;
             default:
                 outputInt(calcExpression());
@@ -213,7 +213,7 @@ void execPrint(void) {
 void execInput(void) {
     char s[16];
     while (1) {
-        switch (cur->type) {
+        switch (tcur->type) {
             case TT_NONE:
                 return;
             case TT_SEPARATOR:
@@ -221,7 +221,7 @@ void execInput(void) {
             case TT_VARIABLE:
                 outputStr("? ");
                 input(s, sizeof(s));
-                setVar(shortVarName(&(cur->body.str)), atoi(s));
+                setVar(shortVarName(&(tcur->body.str)), atoi(s));
                 break;
         }
         advanceExecutor();
@@ -230,7 +230,7 @@ void execInput(void) {
 
 void execIf(void) {
     if (calcExpression() == 0) {
-        while (cur->type != TT_NONE) {
+        while (tcur->type != TT_NONE) {
             advanceExecutor();
         }
     } else {
@@ -239,13 +239,13 @@ void execIf(void) {
 }
 
 void execGoto(void) {
-    nextLineNum = cur->body.integer;
+    nextLineNum = tcur->body.integer;
     advanceExecutor();
 }
 
 void execGosub(void) {
     calcStack[--sp] = nextLineNum;
-    nextLineNum = cur->body.integer;
+    nextLineNum = tcur->body.integer;
     advanceExecutor();
 }
 
@@ -258,7 +258,7 @@ void execEnd(void) {
 }
 
 char executeTokens(token* t) {
-    cur = t;
+    tcur = t;
     while (t->type != TT_NONE) {
         if (t->type == TT_COMMAND) {
             advanceExecutor();
@@ -266,7 +266,7 @@ char executeTokens(token* t) {
         } else {
             execAssignment();
         }
-        t = cur;
+        t = tcur;
     }
     return 1;
 }

@@ -113,6 +113,7 @@ char operatorPriority(char op) {
         case '(':
             return 0;
     }
+    return -1;
 }
 
 char isUnary(char op) {
