@@ -2,7 +2,6 @@
 #include <ctype.h>
 
 #include "utils.h"
-#include "sys.h"
 
 void trim(char* s) {
     int i = 0, k;

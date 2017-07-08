@@ -17,5 +17,11 @@ void outputNStr(nstring* s);
 void outputInt(int n);
 void outputCr();
 
+int sysgetc(void);
+void sysputc(char c);
+int adcread(char channel);
+int pinread(char pin);
+void pinout(char pin, char state);
+
 #endif
 

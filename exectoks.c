@@ -143,6 +143,18 @@ void calcOperation(char op) {
     }
 }
 
+void calcFunction(nstring* name) {
+    if (memcmp(&(name->text), "PIN", 3) == 0) {
+        calcStack[sp] = pinread(calcStack[sp]);
+    } else if (memcmp(&(name->text), "ADC", 3) == 0) {
+        calcStack[sp] = adcread(calcStack[sp]);
+    } else if (memcmp(&(name->text), "ABS", 3) == 0) {
+        calcStack[sp] = abs(calcStack[sp]);
+    } else {
+        calcStack[sp] = 0;
+    }
+}
+
 short calcExpression(void) {
     while (1) {
         switch (cur->type) {
@@ -157,6 +169,9 @@ short calcExpression(void) {
                 break;
             case TT_SYMBOL:
                 calcOperation(cur->body.symbol);
+                break;
+            case TT_FUNCTION:
+                calcFunction(&(cur->body.str));
                 break;
         }
         advanceExecutor();

@@ -176,9 +176,3 @@ void dispatch(void) {
     }
 }
 
-int main(void) {
-    char dataSpace[4096];
-    init(dataSpace, 512);
-    dispatch();
-    return 0;
-}
