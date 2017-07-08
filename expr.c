@@ -135,7 +135,7 @@ void shuntingYard(token* next) {
     char sp = -1;
     char prio;
     char op;
-    void* start = next;
+    char* start = (char*)(void*)next;
     while (next->type != TT_ERROR) {
         if (next->type == TT_VARIABLE || next->type == TT_NUMBER) {
             copyToken(curTok, next);
@@ -160,11 +160,11 @@ void shuntingYard(token* next) {
                 opstack[++sp] = op;
             }
         } else if (next->type == TT_FUNCTION) {
-            opstack[++sp] = (char)(((void*)next) - start);
+            opstack[++sp] = (char)(((char*)(void*)next) - start);
             opstack[++sp] = '(';
         } else if (next->type == TT_FUNC_END) {
             while (convertRpnPop(opstack[sp--]));
-            copyToken(curTok, start + opstack[sp--]);
+            copyToken(curTok, (token*)(void*)(start + opstack[sp--]));
             curTok = nextToken(curTok);
         }
         next = nextToken(next);
@@ -177,9 +177,9 @@ void shuntingYard(token* next) {
 void convertToRpn(token* next) {
     char buf[MAX_LINE_LEN * 2];
     curTok->type = TT_ERROR;
-    memcpy(buf, next, ((void*) curTok) - ((void*) next) + 1);
+    memcpy(buf, next, ((char*)(void*)curTok) - ((char*)(void*)next) + 1);
     curTok = next;
-    next = (void*) buf;
+    next = (token*)(void*) buf;
     shuntingYard(next);
     curTok->type = TT_ERROR;
     prevTok = NULL;

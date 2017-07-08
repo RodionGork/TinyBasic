@@ -3,7 +3,7 @@
 
 #include "tokens.h"
 
-void initTokenExecutor(void* space, short size);
+void initTokenExecutor(char* space, short size);
 char executeTokens(token* t);
 char executeStep(char* lineBuf, token* tokenBuf);
 

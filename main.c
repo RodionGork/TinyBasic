@@ -60,15 +60,14 @@ void printToken(token* t) {
     }
 }
 
-void printTokens(token* toks) {
-    void* t = toks;
+void printTokens(token* t) {
     while (1) {
         printToken(t);
         outputChar(' ');
         if (tokenClass(t) == TT_NONE) {
             break;
         }
-        t += tokenSize(t);
+        t = nextToken(t);
     }
     outputCr();
 }
@@ -140,7 +139,7 @@ char metaOrError(token* t, char* line) {
 
 char processLine(char* line) {
     char toksBody[MAX_LINE_LEN * 2];
-    token* t = (void*) toksBody;
+    token* t = (token*)(void*) toksBody;
     if (line[0] == 0) {
         return 0;
     }
@@ -157,7 +156,7 @@ char processLine(char* line) {
     return 0;
 }
 
-void init(void* space, short dataSize) {
+void init(char* space, short dataSize) {
     outputStr("\nTinyBasic 0.1-PoC\n\n");
     initEditor(space + dataSize);
     initTokenExecutor(space, dataSize);

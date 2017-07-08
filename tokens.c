@@ -64,7 +64,7 @@ short tokenSize(token* t) {
     return 0;
 }
 
-void copyToken(void* dst, void* src) {
+void copyToken(token* dst, token* src) {
     memcpy(dst, src, tokenSize(src));
 }
 
@@ -74,8 +74,8 @@ void setTokenError(char* pos, char code) {
     curTok->type = TT_ERROR;
 }
 
-token* nextToken(void* t) {
-    return t + tokenSize(t);
+token* nextToken(token* t) {
+    return (token*)(void*)((char*)(void*)t + tokenSize(t));
 }
 
 void skipTokenInInput(char offset) {
@@ -311,7 +311,7 @@ char parseStatement(void) {
     return 0;
 }
 
-void parseLine(char* line, void* tokens) {
+void parseLine(char* line, token* tokens) {
     cur = line;
     curTok = tokens;
     prevTok = NULL;

@@ -40,10 +40,10 @@ typedef struct token {
     tbody body;
 } __attribute__((packed)) token;
 
-void parseLine(char* line, void* tokens);
+void parseLine(char* line, token* tokens);
 short tokenSize(token* t);
-token* nextToken(void* t);
-void copyToken(void* dst, void* src);
+token* nextToken(token* t);
+void copyToken(token* dst, token* src);
 char tokenClass(token* t);
 char tokenNameEqual(token* t, char* s);
 char* getParseErrorPos(void);

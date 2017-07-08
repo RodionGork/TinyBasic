@@ -3,10 +3,10 @@
 #include "editor.h"
 #include "utils.h"
 
-void* prg;
+char* prg;
 short prgSize;
 
-void initEditor(void* prgBody) {
+void initEditor(char* prgBody) {
     prg = prgBody;
     ((prgline*)prg)->num = 0;
     prgSize = 2;
@@ -24,12 +24,12 @@ short lineSize(prgline* p) {
     return p->str.len + 3;
 }
 
-prgline* nextLine(void* p) {
-    return p + lineSize(p);
+prgline* nextLine(prgline* p) {
+    return (prgline*)(void*)((char*)(void*)p + lineSize(p));
 }
 
 prgline* findLine(short num) {
-    prgline* p = prg;
+    prgline* p = (prgline*)(void*)prg;
     while (p->num != 0 && p->num < num) {
         p = nextLine(p);
     }
@@ -40,10 +40,10 @@ void injectLine(char* s, short num) {
     unsigned char len = strlen(s);
     prgline* p = findLine(num);
     if (p->num == num) {
-        memmove(p, nextLine(p), prg + prgSize - (void*) nextLine(p));
+        memmove(p, nextLine(p), prg + prgSize - (char*)(void*)nextLine(p));
     }
     if (len > 0) {
-        memmove(((void*)p) + len + 3, p, prg + prgSize - (void*) p);
+        memmove((char*)(void*)p + len + 3, p, prg + prgSize - (char*)(void*)p);
         prgSize += len + 3;
         p->num = num;
         p->str.len = len;

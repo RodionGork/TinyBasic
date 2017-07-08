@@ -39,11 +39,11 @@ varHolder* vars;
 
 char numVars = 0;
 
-void initTokenExecutor(void* space, short size) {
+void initTokenExecutor(char* space, short size) {
     numVars = 0;
     sp = (size / sizeof(*calcStack));
-    vars = space;
-    calcStack = space;
+    vars = (varHolder*)(void*)space;
+    calcStack = (short*)(void*)space;
 }
 
 short shortVarName(nstring* name) {

@@ -10,7 +10,7 @@ typedef struct prgline {
     nstring str;
 } __attribute__((packed)) prgline;
 
-void initEditor(void* prgBody);
+void initEditor(char* prgBody);
 char readLine(char* line);
 prgline* findLine(short num);
 void injectLine(char* s, short num);
