@@ -42,7 +42,7 @@ char* getCurTokPos() {
     return cur;
 }
 
-int tokenSize(token* t) {
+short tokenSize(token* t) {
     switch (t->type) {
         case TT_NUMBER:
             return 1 + sizeof(t->body.integer);
@@ -78,8 +78,8 @@ token* nextToken(void* t) {
     return t + tokenSize(t);
 }
 
-void skipTokenInInput(int skip) {
-    cur = skipSpaces(cur + skip);
+void skipTokenInInput(char offset) {
+    cur = skipSpaces(cur + offset);
 }
 
 void advance(char* s) {
@@ -99,7 +99,7 @@ void trySubstCmd(void) {
     }
 }
 
-int parseName(char checkCmd) {
+char parseName(char checkCmd) {
     short i = 0;
     if (!isalpha(*cur)) {
         return 0;
@@ -117,7 +117,7 @@ int parseName(char checkCmd) {
     return 1;
 }
 
-int parseNumber(void) {
+char parseNumber(void) {
     if (!isdigit(*cur)) {
         return 0;
     }
@@ -131,7 +131,7 @@ int parseNumber(void) {
     return 1;
 }
 
-int parseNone(void) {
+char parseNone(void) {
     if (*cur != 0) {
         setTokenError(cur, 5);
         return 0;
@@ -140,7 +140,7 @@ int parseNone(void) {
     return 1;
 }
 
-int parseComment(void) {
+char parseComment(void) {
     unsigned char len = strlen(cur);
     curTok->type = TT_COMMENT;
     curTok->body.str.len = len;
@@ -149,11 +149,11 @@ int parseComment(void) {
     return parseNone();
 }
 
-int parseLiteral() {
+char parseLiteral() {
     if (*cur != '"') {
         return 0;
     }
-    int i = 1;
+    short i = 1;
     curTok->type = TT_LITERAL;
     while (cur[i] != 0 && cur[i] != '"') {
         curTok->body.str.text[i - 1] = cur[i];
@@ -185,7 +185,7 @@ void parseSymbol() {
     advance(cur + 1);
 }
 
-int parseLineNumber(void) {
+char parseLineNumber(void) {
     char* start = cur;
     if (!parseNumber()) {
         return 1;
@@ -197,7 +197,7 @@ int parseLineNumber(void) {
     return 1;
 }
 
-int parseAssignment(void) {
+char parseAssignment(void) {
     if (*cur != '=') {
         setTokenError(cur, 2);
         return 0;
@@ -206,14 +206,14 @@ int parseAssignment(void) {
     return parseExpression() && parseNone();
 }
 
-int parseExprOrLiteral(void) {
+char parseExprOrLiteral(void) {
     if (parseLiteral()) {
         return 1;
     }
     return parseExpression();
 }
 
-int parseSemicolon(void) {
+char parseSemicolon(void) {
     if (*cur != ';') {
         setTokenError(cur, 4);
         return 0;
@@ -223,7 +223,7 @@ int parseSemicolon(void) {
     return 1;
 }
 
-int parseVar(void) {
+char parseVar(void) {
     if (!parseName(0)) {
         setTokenError(cur, 3);
         return 0;
@@ -232,7 +232,7 @@ int parseVar(void) {
     return 1;
 }
 
-int parseVarList(void) {
+char parseVarList(void) {
     if (!parseVar()) {
         return 0;
     }
@@ -244,7 +244,7 @@ int parseVarList(void) {
     return parseNone();
 }
 
-int parsePrintList(void) {
+char parsePrintList(void) {
     if (!parseExprOrLiteral()) {
         return 0;
     }
@@ -256,7 +256,7 @@ int parsePrintList(void) {
     return parseNone();
 }
 
-int parseLabel(void) {
+char parseLabel(void) {
     if (parseNumber()) {
         return parseNone();
     }
@@ -264,9 +264,9 @@ int parseLabel(void) {
     return 0;
 }
 
-int parseStatement(void);
+char parseStatement(void);
 
-int parseConditional(void) {
+char parseConditional(void) {
     if (!parseExpression()) {
         return 0;
     }
@@ -280,7 +280,7 @@ void parseSpecialWithError() {
     curTok->type = TT_ERROR;
 }
 
-int parseStatement(void) {
+char parseStatement(void) {
     char cmd;
     if (!parseName(1)) {
         setTokenError(cur, 1);
@@ -321,11 +321,11 @@ void parseLine(char* line, void* tokens) {
     }
 }
 
-int tokenClass(token* t) {
+char tokenClass(token* t) {
     return t->type & 0xF0;
 }
 
-int tokenNameEqual(token* t, char* s) {
+char tokenNameEqual(token* t, char* s) {
     if (tokenClass(t) != TT_NAME) {
         return 0;
     }

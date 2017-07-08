@@ -3,9 +3,9 @@
 
 #include "tokens.h"
 
-void initTokenExecutor(void* space, int size);
-int executeTokens(token* t);
-int executeStep(char* lineBuf, token* tokenBuf);
+void initTokenExecutor(void* space, short size);
+char executeTokens(token* t);
+char executeStep(char* lineBuf, token* tokenBuf);
 
 #endif
 

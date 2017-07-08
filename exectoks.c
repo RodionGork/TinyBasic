@@ -39,7 +39,7 @@ varHolder* vars;
 
 char numVars = 0;
 
-void initTokenExecutor(void* space, int size) {
+void initTokenExecutor(void* space, short size) {
     numVars = 0;
     sp = (size / sizeof(*calcStack));
     vars = space;
@@ -257,7 +257,7 @@ void execEnd(void) {
     nextLineNum = 32767;
 }
 
-int executeTokens(token* t) {
+char executeTokens(token* t) {
     cur = t;
     while (t->type != TT_NONE) {
         if (t->type == TT_COMMAND) {
@@ -268,9 +268,10 @@ int executeTokens(token* t) {
         }
         t = cur;
     }
+    return 1;
 }
 
-int executeStep(char* lineBuf, token* tokenBuf) {
+char executeStep(char* lineBuf, token* tokenBuf) {
     prgline* p = findLine(nextLineNum);
     if (p->num == 0) {
         outputStr("End of code\n");

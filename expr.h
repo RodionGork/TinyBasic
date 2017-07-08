@@ -3,7 +3,7 @@
 
 #include "tokens.h"
 
-int parseExpression(void);
+char parseExpression(void);
 
 #endif
 

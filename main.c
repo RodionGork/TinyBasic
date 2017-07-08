@@ -120,7 +120,7 @@ void runSteps(char* lineBody, token* tokensBody) {
     }
 }
 
-int metaOrError(token* t, char* line) {
+char metaOrError(token* t, char* line) {
     if (tokenNameEqual(t, "QUIT")) {
         return 1;
     } else if (tokenNameEqual(t, "LIST")) {
@@ -132,13 +132,13 @@ int metaOrError(token* t, char* line) {
     } else {
         outputStr(getParseErrorMsg());
         outputStr(" (");
-        outputInt((int)(getParseErrorPos() - line) + 1);
+        outputInt((long)(getParseErrorPos() - line) + 1);
         outputStr(")\n");
     }
     return 0;
 }
 
-int processLine(char* line) {
+char processLine(char* line) {
     char toksBody[MAX_LINE_LEN * 2];
     token* t = (void*) toksBody;
     if (line[0] == 0) {
@@ -157,7 +157,7 @@ int processLine(char* line) {
     return 0;
 }
 
-void init(void* space, int dataSize) {
+void init(void* space, short dataSize) {
     outputStr("\nTinyBasic 0.1-PoC\n\n");
     initEditor(space + dataSize);
     initTokenExecutor(space, dataSize);
@@ -167,12 +167,13 @@ void init(void* space, int dataSize) {
 
 void dispatch(void) {
     char line[MAX_LINE_LEN];
-    int quit = 0;
-    while (!quit) {
+    while (1) {
         if (!readLine(line)) {
             break;
         }
-        quit = processLine(line);
+        if (processLine(line)) {
+            break;
+        }
     }
 }
 

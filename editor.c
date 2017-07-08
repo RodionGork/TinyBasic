@@ -12,7 +12,7 @@ void initEditor(void* prgBody) {
     prgSize = 2;
 }
 
-int readLine(char* line) {
+char readLine(char* line) {
     if (!input(line, MAX_LINE_LEN)) {
         return 0;
     }
@@ -20,7 +20,7 @@ int readLine(char* line) {
     return 1;
 }
 
-int lineSize(prgline* p) {
+short lineSize(prgline* p) {
     return p->str.len + 3;
 }
 
@@ -28,7 +28,7 @@ prgline* nextLine(void* p) {
     return p + lineSize(p);
 }
 
-prgline* findLine(int num) {
+prgline* findLine(short num) {
     prgline* p = prg;
     while (p->num != 0 && p->num < num) {
         p = nextLine(p);
@@ -36,7 +36,7 @@ prgline* findLine(int num) {
     return p;
 }
 
-void injectLine(char* s, int num) {
+void injectLine(char* s, short num) {
     unsigned char len = strlen(s);
     prgline* p = findLine(num);
     if (p->num == num) {

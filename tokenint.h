@@ -5,11 +5,11 @@ extern token* curTok;
 extern token* prevTok;
 
 char* getCurTokPos();
-void skipTokenInInput(int skip);
-int parseName(char checkCmd);
-int parseSymbol(void);
-int parseNumber(void);
-int parseNone();
+void skipTokenInInput(char offset);
+char parseName(char checkCmd);
+char parseSymbol(void);
+char parseNumber(void);
+char parseNone();
 void setTokenError(char* pos, char code);
 
 #endif

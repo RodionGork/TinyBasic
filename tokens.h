@@ -41,11 +41,11 @@ typedef struct token {
 } __attribute__((packed)) token;
 
 void parseLine(char* line, void* tokens);
-int tokenSize(token* t);
+short tokenSize(token* t);
 token* nextToken(void* t);
 void copyToken(void* dst, void* src);
-int tokenClass(token* t);
-int tokenNameEqual(token* t, char* s);
+char tokenClass(token* t);
+char tokenNameEqual(token* t, char* s);
 char* getParseErrorPos(void);
 char* getParseErrorMsg(void);
 

@@ -9,18 +9,18 @@ typedef struct nstring {
 void trim(char* s);
 char* skipSpaces(char* s);
 char* skipDigits(char* s);
-int charInStr(char c, char* s);
-int input(char* s, int n);
+char charInStr(char c, char* s);
+char input(char* s, short n);
 void outputChar(char c);
 void outputStr(char* s);
 void outputNStr(nstring* s);
-void outputInt(int n);
+void outputInt(long n);
 void outputCr();
 
-int sysgetc(void);
+short sysgetc(void);
 void sysputc(char c);
-int adcread(char channel);
-int pinread(char pin);
+short adcread(char channel);
+char pinread(char pin);
 void pinout(char pin, char state);
 
 #endif

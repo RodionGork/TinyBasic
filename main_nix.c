@@ -2,7 +2,7 @@
 
 #include "main.h"
 
-int sysgetc(void) {
+short sysgetc(void) {
     return getc(stdin);
 }
 

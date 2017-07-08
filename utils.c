@@ -4,7 +4,7 @@
 #include "utils.h"
 
 void trim(char* s) {
-    int i = 0, k;
+    short i = 0, k;
     while (s[i] != 0 && s[i] <= ' ') {
         i++;
     }
@@ -31,7 +31,7 @@ char* skipDigits(char* s) {
     return s;
 }
 
-int charInStr(char c, char* s) {
+char charInStr(char c, char* s) {
     while (*s != 0) {
         if (*s == c) {
             return 1;
@@ -41,9 +41,9 @@ int charInStr(char c, char* s) {
     return 0;
 }
 
-int input(char* s, int n) {
-    int i = 0;
-    int c;
+char input(char* s, short n) {
+    short i = 0;
+    short c;
     n -= 1;
     while (i < n) {
         c = sysgetc();
@@ -78,8 +78,8 @@ void outputNStr(nstring* t) {
     }
 };
 
-void outputInt(int n) {
-    int d = 1000000000;
+void outputInt(long n) {
+    long d = 1000000000;
     if (n == 0) {
         sysputc('0');
         return;

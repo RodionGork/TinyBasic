@@ -6,7 +6,7 @@
 #include "expr.h"
 #include "editor.h"
 
-int parseExprUnary() {
+char parseExprUnary() {
     if (!charInStr(*getCurTokPos(), "-!")) {
         return 0;
     }
@@ -64,7 +64,7 @@ char parseExprBop(void) {
     return 'e';
 }
 
-char parseExprRbr(int brCount, int argCount) {
+char parseExprRbr(char brCount, char argCount) {
     if (brCount < 1) {
         setTokenError(getCurTokPos(), 9);
         return 'e';
@@ -184,7 +184,7 @@ void convertToRpn(token* next) {
     prevTok = NULL;
 }
 
-int parseExpression(void) {
+char parseExpression(void) {
     token* startTok = curTok;
     char funcBrackets[16];
     char iFuncBr = 0;

@@ -1,7 +1,0 @@
-10 PRINT "Hello"
-20 INPUT X
-30 I = 1
-40 PRINT I, "->", I*I
-50 I = I+1
-60 IF I <= X THEN GOTO 40
-100 END
