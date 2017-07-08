@@ -115,6 +115,11 @@ void executeSteps(char* lineBody, token* tokensBody) {
     }
 }
 
+void runSteps(char* lineBody, token* tokensBody) {
+    while (executeStep(lineBody, tokensBody) == 0) {
+    }
+}
+
 int metaOrError(token* t, char* line) {
     if (tokenNameEqual(t, "QUIT")) {
         return 1;
@@ -122,6 +127,8 @@ int metaOrError(token* t, char* line) {
         listProgram(t);
     } else if (tokenNameEqual(t, "STEP")) {
         executeSteps(line, t);
+    } else if (tokenNameEqual(t, "RUN")) {
+        runSteps(line, t);
     } else {
         outputStr(getParseErrorMsg());
         outputStr(" (");

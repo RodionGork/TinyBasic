@@ -1,7 +1,8 @@
+#include <stdlib.h>
 #include <ctype.h>
-#include <stdio.h>
 
 #include "utils.h"
+#include "sys.h"
 
 void trim(char* s) {
     int i = 0, k;
@@ -42,28 +43,59 @@ int charInStr(char c, char* s) {
 }
 
 int input(char* s, int n) {
-    return fgets(s, n, stdin) != NULL;
+    int i = 0;
+    int c;
+    n -= 1;
+    while (i < n) {
+        c = sysgetc();
+        if (c < 0) {
+            if (i == 0) {
+                return 0;
+            }
+            break;
+        }
+        if (c == '\r' || c == '\n') {
+            break;
+        }
+        s[i++] = c;
+    }
+    s[i] = 0;
+    return 1;
 }
 
 void outputChar(char c) {
-    putc(c, stdout);
+    sysputc(c);
 }
 
 void outputStr(char* s) {
-    printf("%s", s);
+    while (*s) {
+        sysputc(*(s++));
+    }
 }
 
 void outputNStr(nstring* t) {
     for (short i = 0; i < t->len; i++) {
-        putc(t->text[i], stdout);
+        sysputc(t->text[i]);
     }
 };
 
 void outputInt(int n) {
-    printf("%d", n);
+    int d = 1000000000;
+    if (n == 0) {
+        sysputc('0');
+        return;
+    }
+    while (d > n) {
+        d /= 10;
+    }
+    while (d > 0) {
+        sysputc(n / d + '0');
+        n %= d;
+        d /= 10;
+    }
 }
 
 void outputCr() {
-    printf("\n");
+    sysputc('\n');
 }
 
