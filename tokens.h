@@ -28,18 +28,6 @@
 
 #include "utils.h"
 
-typedef union tbody {
-    short integer;
-    char symbol;
-    char command;
-    nstring str;
-} tbody;
-
-typedef struct token {
-    char type;
-    tbody body;
-} __attribute__((packed)) token;
-
 void parseLine(char* line, token* tokens);
 short tokenSize(token* t);
 token* nextToken(token* t);

@@ -5,11 +5,6 @@
 
 #define MAX_LINE_LEN 80
 
-typedef struct prgline {
-    short num;
-    nstring str;
-} __attribute__((packed)) prgline;
-
 void initEditor(char* prgBody);
 char readLine(char* line);
 prgline* findLine(short num);
