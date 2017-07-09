@@ -164,7 +164,7 @@ char parseLiteral() {
     return 1;
 }
 
-void parseSymbol() {
+char parseSymbol() {
     curTok->type = TT_SYMBOL;
     char c = 0;
     if (cur[0] == '<') {
@@ -183,6 +183,7 @@ void parseSymbol() {
     }
     curTok->body.symbol = c;
     advance(cur + 1);
+    return 1;
 }
 
 char parseLineNumber(void) {
