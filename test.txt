@@ -6,3 +6,4 @@
 30 if x < 30000 ; goto 20
 40 print "done "; x
 run
+quit

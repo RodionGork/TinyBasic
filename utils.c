@@ -48,10 +48,8 @@ char input(char* s, short n) {
     while (i < n) {
         c = sysgetc();
         if (c < 0) {
-            if (i == 0) {
-                return 0;
-            }
-            break;
+            sysdelay(1);
+            continue;
         }
         if (c == '\r' || c == '\n') {
             break;
