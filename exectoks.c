@@ -23,6 +23,8 @@ void execGoto(void);
 void execGosub(void);
 void execReturn(void);
 void execEnd(void);
+void execPin(void);
+void execDelay(void);
 
 void (*executors[])(void) = {
     execRem,
@@ -33,6 +35,8 @@ void (*executors[])(void) = {
     execGosub,
     execReturn,
     execEnd,
+    execPin,
+    execDelay,
 };
 
 varHolder* vars;
@@ -255,6 +259,16 @@ void execReturn(void) {
 
 void execEnd(void) {
     nextLineNum = 32767;
+}
+
+void execPin(void) {
+    char pin = calcExpression();
+    advanceExecutor();
+    pinout(pin, calcExpression());
+}
+
+void execDelay(void) {
+    sysdelay(calcExpression());
 }
 
 char executeTokens(token* t) {

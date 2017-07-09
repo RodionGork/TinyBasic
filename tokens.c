@@ -15,6 +15,8 @@ char* cmds[] = {
     "GOSUB",
     "RETURN",
     "END",
+    "PIN",
+    "DELAY",
     ""
 };
 
@@ -257,6 +259,10 @@ char parsePrintList(void) {
     return parseNone();
 }
 
+char parseTwoExpressions(void) {
+    return parseExpression() && parseSemicolon() && parseExpression() && parseNone();
+}
+
 char parseLabel(void) {
     if (parseNumber()) {
         return parseNone();
@@ -307,6 +313,10 @@ char parseStatement(void) {
         return parseVarList();
     } else if (cmd == CMD_IF) {
         return parseConditional();
+    } else if (cmd == CMD_DELAY) {
+        return parseExpression() && parseNone();
+    } else if (cmd == CMD_PIN) {
+        return parseTwoExpressions();
     }
     setTokenError(cur, 6);
     return 0;

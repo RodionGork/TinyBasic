@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "main.h"
+#include "utils.h"
 
 short sysgetc(void) {
     return getc(stdin);
@@ -19,6 +20,17 @@ char pinread(char pin) {
 }
 
 void pinout(char pin, char state) {
+    outputStr("pinout: ");
+    outputInt(pin);
+    outputChar(',');
+    outputInt(state);
+    outputCr();
+}
+
+void sysdelay(short ms) {
+    outputStr("delay: ");
+    outputInt(ms);
+    outputCr();
 }
 
 int main(void) {

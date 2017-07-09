@@ -19,6 +19,7 @@ void sysputc(char c);
 short adcread(char channel);
 char pinread(char pin);
 void pinout(char pin, char state);
+void sysdelay(short ms);
 
 #endif
 

@@ -23,6 +23,7 @@
 #define CMD_RETURN 6
 #define CMD_END 7
 #define CMD_PIN 8
+#define CMD_DELAY 9
 
 #define MAX_LINE_NUMBER 30000
 
