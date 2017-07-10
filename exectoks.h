@@ -3,6 +3,8 @@
 
 #include "tokens.h"
 
+extern short nextLineNum;
+
 void initTokenExecutor(char* space, short size);
 char executeTokens(token* t);
 char executeStep(char* lineBuf, token* tokenBuf);

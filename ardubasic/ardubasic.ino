@@ -31,6 +31,15 @@ void sysdelay(short ms) {
     delay(ms);
 }
 
+void syssave(char id, char* data) {
+}
+
+void sysload(char id, char* data) {
+}
+
+void sysquit(void) {
+}
+
 char dataSpace[1200];
 
 void setup() {

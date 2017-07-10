@@ -119,41 +119,65 @@ void runSteps(char* lineBody, token* tokensBody) {
     }
 }
 
-char metaOrError(token* t, char* line) {
+void prgReset(void) {
+}
+
+void showInfo(void) {
+    outputStr("code size: ");
+    outputInt(prgSize);
+    outputCr();
+    outputStr("next line: ");
+    outputInt(nextLineNum);
+    outputCr();
+}
+
+void showHelp(void) {
+}
+
+void metaOrError(token* t, char* line) {
     if (tokenNameEqual(t, "QUIT")) {
-        return 1;
+        sysquit();
     } else if (tokenNameEqual(t, "LIST")) {
         listProgram(t);
     } else if (tokenNameEqual(t, "STEP")) {
         executeSteps(line, t);
     } else if (tokenNameEqual(t, "RUN")) {
         runSteps(line, t);
+    } else if (tokenNameEqual(t, "SAVE")) {
+        editorSave();
+    } else if (tokenNameEqual(t, "LOAD")) {
+        editorLoad();
+    } else if (tokenNameEqual(t, "RESET")) {
+        prgReset();
+    } else if (tokenNameEqual(t, "INFO")) {
+        showInfo();
+    } else if (tokenNameEqual(t, "HELP")) {
+        showHelp();
     } else {
         outputStr(getParseErrorMsg());
         outputStr(" (");
         outputInt((long)(getParseErrorPos() - line) + 1);
         outputStr(")\n");
     }
-    return 0;
 }
 
-char processLine(char* line) {
+void processLine(char* line) {
     char toksBody[MAX_LINE_LEN * 2];
     token* t = (token*)(void*) toksBody;
     if (line[0] == 0) {
-        return 0;
+        return;
     }
     parseLine(line, t);
     //printTokens(t);
     if (getParseErrorPos() != NULL) {
-        return metaOrError(t, line);
+        metaOrError(t, line);
+        return;
     }
     if (t->type != TT_NUMBER) {
         executeTokens(t);
     } else {
         injectLine(skipSpaces(skipDigits(line)), t->body.integer);
     }
-    return 0;
 }
 
 void init(char* space, short dataSize) {
@@ -167,12 +191,8 @@ void init(char* space, short dataSize) {
 void dispatch(void) {
     char line[MAX_LINE_LEN];
     while (1) {
-        if (!readLine(line)) {
-            break;
-        }
-        if (processLine(line)) {
-            break;
-        }
+        readLine(line);
+        processLine(line);
     }
 }
 

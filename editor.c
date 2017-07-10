@@ -37,11 +37,14 @@ prgline* findLine(short num) {
 }
 
 void injectLine(char* s, short num) {
-    unsigned char len = strlen(s);
+    unsigned char len;
     prgline* p = findLine(num);
     if (p->num == num) {
+        len = (char*)(void*)nextLine(p) - (char*)(void*)p;
         memmove(p, nextLine(p), prg + prgSize - (char*)(void*)nextLine(p));
+        prgSize -= len;
     }
+    len = strlen(s);
     if (len > 0) {
         memmove((char*)(void*)p + len + 3, p, prg + prgSize - (char*)(void*)p);
         prgSize += len + 3;
@@ -49,5 +52,13 @@ void injectLine(char* s, short num) {
         p->str.len = len;
         memcpy(p->str.text, s, len);
     }
+}
+
+void editorSave(void) {
+    syssave(0, prg, prgSize);
+}
+
+void editorLoad(void) {
+    prgSize = sysload(0, prg);
 }
 

@@ -20,6 +20,9 @@ short adcread(char channel);
 char pinread(char pin);
 void pinout(char pin, char state);
 void sysdelay(short ms);
+void syssave(char id, char* data, short size);
+short sysload(char id, char* data);
+void sysquit(void);
 
 #endif
 
