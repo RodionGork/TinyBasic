@@ -78,6 +78,10 @@ void outputNStr(nstring* t) {
 
 void outputInt(long n) {
     long d = 1000000000;
+    if (n < 0) {
+        outputChar('-');
+        n = -n;
+    }
     if (n == 0) {
         sysputc('0');
         return;

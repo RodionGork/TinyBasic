@@ -1,6 +1,8 @@
 #ifndef __MYTYPES_H_
 #define __MYTYPES_H_
 
+typedef signed long int numeric;
+
 typedef struct nstring {
     unsigned char len;
     char text[1];
@@ -12,7 +14,7 @@ typedef struct prgline {
 } __attribute__((packed)) prgline;
 
 typedef union tbody {
-    short integer;
+    numeric integer;
     char symbol;
     char command;
     nstring str;
@@ -22,5 +24,10 @@ typedef struct token {
     char type;
     tbody body;
 } __attribute__((packed)) token;
+
+typedef struct varHolder {
+    short name;
+    numeric value;
+} __attribute__((packed)) varHolder;
 
 #endif

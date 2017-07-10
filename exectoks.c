@@ -1,17 +1,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mytypes.h"
 #include "tokens.h"
 #include "editor.h"
 #include "utils.h"
 
-typedef struct varHolder {
-    short name;
-    short value;
-} __attribute__((packed)) varHolder;
-
 token* tcur;
-short* calcStack;
+numeric* calcStack;
 short nextLineNum = 1;
 short sp;
 
@@ -47,7 +43,7 @@ void initTokenExecutor(char* space, short size) {
     numVars = 0;
     sp = (size / sizeof(*calcStack));
     vars = (varHolder*)(void*)space;
-    calcStack = (short*)(void*)space;
+    calcStack = (numeric*)(void*)space;
 }
 
 short shortVarName(nstring* name) {
@@ -73,12 +69,12 @@ char findVar(short name) {
     return lo;
 }
 
-short getVar(short name) {
+numeric getVar(short name) {
     char i = findVar(name);
     return (vars[i].name == name) ? vars[i].value : 0;
 }
 
-void setVar(short name, short value) {
+void setVar(short name, numeric value) {
     char i = findVar(name);
     if (vars[i].name != name) {
         if (i < numVars) {
@@ -97,7 +93,7 @@ void advanceExecutor(void) {
 }
 
 void calcOperation(char op) {
-    short top = calcStack[sp++];
+    numeric top = calcStack[sp++];
     switch (op) {
         case '+':
             calcStack[sp] += top;
@@ -159,7 +155,7 @@ void calcFunction(nstring* name) {
     }
 }
 
-short calcExpression(void) {
+numeric calcExpression(void) {
     while (1) {
         switch (tcur->type) {
             case TT_NONE:
