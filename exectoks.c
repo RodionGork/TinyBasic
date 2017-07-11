@@ -9,7 +9,10 @@
 token* tcur;
 numeric* calcStack;
 short nextLineNum = 1;
-short sp;
+short sp, spInit;
+varHolder* vars;
+char numVars;
+
 
 void execRem(void);
 void execPrint(void);
@@ -35,15 +38,16 @@ void (*executors[])(void) = {
     execDelay,
 };
 
-varHolder* vars;
-
-char numVars = 0;
+void resetTokenExecutor(void) {
+    numVars = 0;
+    sp = spInit;
+}
 
 void initTokenExecutor(char* space, short size) {
-    numVars = 0;
-    sp = (size / sizeof(*calcStack));
+    spInit = (size / sizeof(*calcStack));
     vars = (varHolder*)(void*)space;
     calcStack = (numeric*)(void*)space;
+    resetTokenExecutor();
 }
 
 short shortVarName(nstring* name) {
@@ -145,9 +149,9 @@ void calcOperation(char op) {
 
 void calcFunction(nstring* name) {
     if (memcmp(&(name->text), "PIN", 3) == 0) {
-        calcStack[sp] = pinread(calcStack[sp]);
+        calcStack[sp] = pinRead(calcStack[sp]);
     } else if (memcmp(&(name->text), "ADC", 3) == 0) {
-        calcStack[sp] = adcread(calcStack[sp]);
+        calcStack[sp] = adcRead(calcStack[sp]);
     } else if (memcmp(&(name->text), "ABS", 3) == 0) {
         calcStack[sp] = abs(calcStack[sp]);
     } else {
@@ -260,11 +264,11 @@ void execEnd(void) {
 void execPin(void) {
     char pin = calcExpression();
     advanceExecutor();
-    pinout(pin, calcExpression());
+    pinOut(pin, calcExpression());
 }
 
 void execDelay(void) {
-    sysdelay(calcExpression());
+    sysDelay(calcExpression());
 }
 
 char executeTokens(token* t) {
@@ -295,3 +299,6 @@ char executeStep(char* lineBuf, token* tokenBuf) {
     return 0;
 }
 
+char executeParsed(char* prgBuf) {
+    return 0;
+}

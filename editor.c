@@ -3,13 +3,17 @@
 #include "editor.h"
 #include "utils.h"
 
-char* prg;
+char* prgStore;
 short prgSize;
 
-void initEditor(char* prgBody) {
-    prg = prgBody;
-    ((prgline*)prg)->num = 0;
+void resetEditor(void) {
+    ((prgline*)prgStore)->num = 0;
     prgSize = 2;
+}
+
+void initEditor(char* prgBody) {
+    prgStore = prgBody;
+    resetEditor();
 }
 
 char readLine(char* line) {
@@ -29,7 +33,7 @@ prgline* nextLine(prgline* p) {
 }
 
 prgline* findLine(short num) {
-    prgline* p = (prgline*)(void*)prg;
+    prgline* p = (prgline*)(void*)prgStore;
     while (p->num != 0 && p->num < num) {
         p = nextLine(p);
     }
@@ -41,12 +45,12 @@ void injectLine(char* s, short num) {
     prgline* p = findLine(num);
     if (p->num == num) {
         len = (char*)(void*)nextLine(p) - (char*)(void*)p;
-        memmove(p, nextLine(p), prg + prgSize - (char*)(void*)nextLine(p));
+        memmove(p, nextLine(p), prgStore + prgSize - (char*)(void*)nextLine(p));
         prgSize -= len;
     }
     len = strlen(s);
     if (len > 0) {
-        memmove((char*)(void*)p + len + 3, p, prg + prgSize - (char*)(void*)p);
+        memmove((char*)(void*)p + len + 3, p, prgStore + prgSize - (char*)(void*)p);
         prgSize += len + 3;
         p->num = num;
         p->str.len = len;
@@ -55,10 +59,16 @@ void injectLine(char* s, short num) {
 }
 
 void editorSave(void) {
-    syssave(0, prg, prgSize);
+    storageOperation(NULL, 1);
+    storageOperation(&prgSize, sizeof(prgSize));
+    storageOperation(prgStore, prgSize);
+    storageOperation(NULL, 0);
 }
 
 void editorLoad(void) {
-    prgSize = sysload(0, prg);
+    storageOperation(NULL, -1);
+    storageOperation(&prgSize, (short)-sizeof(prgSize));
+    storageOperation(prgStore, -prgSize);
+    storageOperation(NULL, 0);
 }
 

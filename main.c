@@ -115,11 +115,13 @@ void executeSteps(char* lineBody, token* tokensBody) {
 }
 
 void runSteps(char* lineBody, token* tokensBody) {
-    while (executeStep(lineBody, tokensBody) == 0) {
-    }
+    editorSave();
+    editorLoad();
 }
 
 void prgReset(void) {
+    resetEditor();
+    resetTokenExecutor();
 }
 
 void showInfo(void) {
@@ -136,7 +138,7 @@ void showHelp(void) {
 
 void metaOrError(token* t, char* line) {
     if (tokenNameEqual(t, "QUIT")) {
-        sysquit();
+        sysQuit();
     } else if (tokenNameEqual(t, "LIST")) {
         listProgram(t);
     } else if (tokenNameEqual(t, "STEP")) {

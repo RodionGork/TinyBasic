@@ -14,15 +14,14 @@ void outputNStr(nstring* s);
 void outputInt(long n);
 void outputCr();
 
-short sysgetc(void);
-void sysputc(char c);
-short adcread(char channel);
-char pinread(char pin);
-void pinout(char pin, char state);
-void sysdelay(short ms);
-void syssave(char id, char* data, short size);
-short sysload(char id, char* data);
-void sysquit(void);
+short sysGetc(void);
+void sysPutc(char c);
+short adcRead(char channel);
+char pinRead(char pin);
+void pinOut(char pin, char state);
+void sysDelay(short ms);
+void sysQuit(void);
+char storageOperation(void* data, short size);
 
 #endif
 

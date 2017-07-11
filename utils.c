@@ -46,9 +46,9 @@ char input(char* s, short n) {
     short c;
     n -= 1;
     while (i < n) {
-        c = sysgetc();
+        c = sysGetc();
         if (c < 0) {
-            sysdelay(1);
+            sysDelay(1);
             continue;
         }
         if (c == '\r' || c == '\n') {
@@ -61,18 +61,18 @@ char input(char* s, short n) {
 }
 
 void outputChar(char c) {
-    sysputc(c);
+    sysPutc(c);
 }
 
 void outputStr(char* s) {
     while (*s) {
-        sysputc(*(s++));
+        sysPutc(*(s++));
     }
 }
 
 void outputNStr(nstring* t) {
     for (short i = 0; i < t->len; i++) {
-        sysputc(t->text[i]);
+        sysPutc(t->text[i]);
     }
 };
 
@@ -83,20 +83,20 @@ void outputInt(long n) {
         n = -n;
     }
     if (n == 0) {
-        sysputc('0');
+        sysPutc('0');
         return;
     }
     while (d > n) {
         d /= 10;
     }
     while (d > 0) {
-        sysputc(n / d + '0');
+        sysPutc(n / d + '0');
         n %= d;
         d /= 10;
     }
 }
 
 void outputCr() {
-    sysputc('\n');
+    sysPutc('\n');
 }
 

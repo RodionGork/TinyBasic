@@ -4,23 +4,26 @@
 #include "main.h"
 #include "utils.h"
 
-short sysgetc(void) {
+FILE* fCurrent;
+short idCurrent = 0;
+
+short sysGetc(void) {
     return getc(stdin);
 }
 
-void sysputc(char c) {
+void sysPutc(char c) {
     putc(c, stdout);
 }
 
-short adcread(char channel) {
+short adcRead(char channel) {
     return 0;
 }
 
-char pinread(char pin) {
+char pinRead(char pin) {
     return 0;
 }
 
-void pinout(char pin, char state) {
+void pinOut(char pin, char state) {
     outputStr("pinout: ");
     outputInt(pin);
     outputChar(',');
@@ -28,34 +31,41 @@ void pinout(char pin, char state) {
     outputCr();
 }
 
-void sysdelay(short ms) {
+void sysDelay(short ms) {
     outputStr("delay: ");
     outputInt(ms);
     outputCr();
 }
 
-void syssave(char id, char* data, short size) {
+FILE* openStorage(char id, char op) {
     char fname[] = "store0.dat";
+    char ops[] = "xb";
     fname[5] += id;
-    FILE* f = fopen(fname, "wb");
-    fwrite(data, size, 1, f);
-    fclose(f);
+    ops[0] = op;
+    return fopen(fname, ops);
 }
 
-short sysload(char id, char* data) {
-    char fname[] = "store0.dat";
-    long size;
-    fname[5] += id;
-    FILE* f = fopen(fname, "rb");
-    fseek(f, 0, SEEK_END);
-    size = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    fread(data, size, 1, f);
-    fclose(f);
-    return size;
+char storageOperation(void* data, short size) {
+    if (data == NULL) {
+        if (idCurrent != 0) {
+            fclose(fCurrent);
+        }
+        idCurrent = 0;
+        if (size != 0) {
+            idCurrent = abs(size);
+            fCurrent = openStorage(idCurrent, size > 0 ? 'w' : 'r');
+        }
+        return 1;
+    }
+    if (size > 0) {
+        fwrite(data, size, 1, fCurrent);
+    } else {
+        fread(data, -size, 1, fCurrent);
+    }
+    return 1;
 }
 
-void sysquit(void) {
+void sysQuit(void) {
     exit(0);
 }
 

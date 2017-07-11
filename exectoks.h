@@ -5,9 +5,11 @@
 
 extern short nextLineNum;
 
+void resetTokenExecutor(void);
 void initTokenExecutor(char* space, short size);
 char executeTokens(token* t);
 char executeStep(char* lineBuf, token* tokenBuf);
+char executeParsed(char* prgBuf);
 
 #endif
 

@@ -3,10 +3,9 @@
 
 #include "utils.h"
 
-#define MAX_LINE_LEN 80
-
 extern short prgSize;
 
+void resetEditor(void);
 void initEditor(char* prgBody);
 char readLine(char* line);
 prgline* findLine(short num);

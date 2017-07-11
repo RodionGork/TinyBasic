@@ -1,6 +1,8 @@
 #ifndef __MYTYPES_H_
 #define __MYTYPES_H_
 
+#define MAX_LINE_LEN 80
+
 typedef signed long int numeric;
 
 typedef struct nstring {

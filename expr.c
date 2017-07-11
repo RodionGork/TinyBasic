@@ -4,7 +4,6 @@
 #include "tokens.h"
 #include "tokenint.h"
 #include "expr.h"
-#include "editor.h"
 
 char parseExprUnary() {
     if (!charInStr(*getCurTokPos(), "-!")) {
