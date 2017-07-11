@@ -66,6 +66,14 @@ short tokenSize(token* t) {
     return 0;
 }
 
+short tokenChainSize(token* src) {
+    token* t = src;
+    while (t->type != TT_NONE) {
+        t = nextToken(t);
+    }
+    return (short)((char*)(void*)t - (char*)(void*)src) + 1;
+}
+
 void copyToken(token* dst, token* src) {
     memcpy(dst, src, tokenSize(src));
 }

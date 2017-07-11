@@ -31,6 +31,7 @@
 
 void parseLine(char* line, token* tokens);
 short tokenSize(token* t);
+short tokenChainSize(token* t);
 token* nextToken(token* t);
 void copyToken(token* dst, token* src);
 char tokenClass(token* t);

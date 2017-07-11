@@ -292,13 +292,14 @@ char executeStep(char* lineBuf, token* tokenBuf) {
         return 1;
     }
     nextLineNum = p->num + 1;
-    memcpy(lineBuf, p->str.text, p->str.len);
-    lineBuf[p->str.len] = 0;
-    parseLine(lineBuf, tokenBuf);
-    executeTokens(tokenBuf);
+    if (tokenBuf != NULL) {
+        memcpy(lineBuf, p->str.text, p->str.len);
+        lineBuf[p->str.len] = 0;
+        parseLine(lineBuf, tokenBuf);
+        executeTokens(tokenBuf);
+    } else {
+        executeTokens((token*)(void*)(p->str.text));
+    }
     return 0;
 }
 
-char executeParsed(char* prgBuf) {
-    return 0;
-}

@@ -12,6 +12,7 @@ prgline* findLine(short num);
 void injectLine(char* s, short num);
 void editorSave(void);
 void editorLoad(void);
+void editorLoadParsed(char* lineBuf, token* tokenBuf);
 
 #endif
 

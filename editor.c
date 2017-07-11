@@ -2,6 +2,7 @@
 
 #include "editor.h"
 #include "utils.h"
+#include "tokens.h"
 
 char* prgStore;
 short prgSize;
@@ -67,8 +68,33 @@ void editorSave(void) {
 
 void editorLoad(void) {
     storageOperation(NULL, -1);
-    storageOperation(&prgSize, (short)-sizeof(prgSize));
+    storageOperation(&prgSize, (short) -sizeof(prgSize));
     storageOperation(prgStore, -prgSize);
     storageOperation(NULL, 0);
+}
+
+void editorLoadParsed(char* lineBuf, token* tokenBuf) {
+    void* p = prgStore;
+    unsigned char len;
+    storageOperation(NULL, -1);
+    storageOperation(lineBuf, -2);
+    while (1) {
+        storageOperation(p, (short) -sizeof(short));
+        if (*((short*)p) == 0) {
+            break;
+        }
+        parseLine(lineBuf, tokenBuf);
+        p = (char*)p + sizeof(short);
+        storageOperation(&len, (short) -sizeof(len));
+        storageOperation(lineBuf, -len);
+        lineBuf[len] = 0;
+        parseLine(lineBuf, tokenBuf);
+        len = tokenChainSize(tokenBuf);
+        *((char*)p) = len;
+        memcpy((char*)p + 1, tokenBuf, len);
+        p = (char*)p + len + 1;
+    }
+    storageOperation(NULL, 0);
+    prgSize = ((char*)p - (char*)(void*)prgStore) + sizeof(short);
 }
 

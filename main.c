@@ -116,6 +116,9 @@ void executeSteps(char* lineBody, token* tokensBody) {
 
 void runSteps(char* lineBody, token* tokensBody) {
     editorSave();
+    editorLoadParsed(lineBody, tokensBody);
+    while (executeStep(NULL, NULL) == 0) {
+    }
     editorLoad();
 }
 
