@@ -3,6 +3,7 @@
 
 #include "utils.h"
 
+extern char* prgStore;
 extern short prgSize;
 
 void resetEditor(void);

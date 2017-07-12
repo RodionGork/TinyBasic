@@ -9,6 +9,7 @@ void resetTokenExecutor(void);
 void initTokenExecutor(char* space, short size);
 char executeTokens(token* t);
 char executeStep(char* lineBuf, token* tokenBuf);
+void executeParsedRun(void);
 
 #endif
 

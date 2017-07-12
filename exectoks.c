@@ -12,7 +12,8 @@ short nextLineNum = 1;
 short sp, spInit;
 varHolder* vars;
 char numVars;
-
+labelCacheElem* labelCache;
+short labelsCached;
 
 void execRem(void);
 void execPrint(void);
@@ -88,6 +89,52 @@ void setVar(short name, numeric value) {
         numVars += 1;
     }
     vars[i].value = value;
+}
+
+short findLabel(short num) {
+    short hi = labelsCached;
+    short lo = 0;
+    short mid;
+    while (hi > lo) {
+        mid = (hi + lo) / 2;
+        if (labelCache[mid].num < num) {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    /*
+    outputStr("find-label: ");
+    outputInt(num);
+    outputChar(' ');
+    outputInt(labelCache[lo].num);
+    outputChar(' ');
+    outputInt(labelCache[lo].offset);
+    outputCr();
+    */
+    return lo;
+}
+
+prgline* getCachedLabel(short num) {
+    short i = findLabel(num);
+    return labelCache[i].num == num ? (prgline*)(void*)(prgStore + labelCache[i].offset) : NULL;
+}
+
+void addCachedLabel(short num, short offset) {
+    short idx = findLabel(num);
+    /*
+    outputStr("add-label: ");
+    outputInt(num);
+    outputChar(' ');
+    outputInt(offset);
+    outputCr();
+    */
+    if (idx < labelsCached) {
+        memmove(labelCache + idx + 1, labelCache + idx, sizeof(labelCacheElem) * (labelsCached - idx));
+    }
+    labelCache[idx].num = num;
+    labelCache[idx].offset = offset;
+    labelsCached += 1;
 }
 
 void advanceExecutor(void) {
@@ -285,21 +332,46 @@ char executeTokens(token* t) {
     return 1;
 }
 
+void signalEndOfCode(void) {
+    outputStr("End of code\n");
+}
+
 char executeStep(char* lineBuf, token* tokenBuf) {
     prgline* p = findLine(nextLineNum);
     if (p->num == 0) {
-        outputStr("End of code\n");
+        signalEndOfCode();
         return 1;
     }
     nextLineNum = p->num + 1;
-    if (tokenBuf != NULL) {
-        memcpy(lineBuf, p->str.text, p->str.len);
-        lineBuf[p->str.len] = 0;
-        parseLine(lineBuf, tokenBuf);
-        executeTokens(tokenBuf);
-    } else {
-        executeTokens((token*)(void*)(p->str.text));
-    }
+    memcpy(lineBuf, p->str.text, p->str.len);
+    lineBuf[p->str.len] = 0;
+    parseLine(lineBuf, tokenBuf);
+    executeTokens(tokenBuf);
     return 0;
+}
+
+void executeParsedRun(void) {
+    prgline* p = findLine(nextLineNum);
+    prgline* next;
+    labelsCached = 0;
+    labelCache = (labelCacheElem*)(void*)(prgStore + prgSize);
+    while (1) {
+        if (p->num == 0 || nextLineNum == 0) {
+            return;
+        }
+        next = (prgline*)(void*)((char*)(void*)p + sizeof(p->num) + sizeof(p->str.len) + p->str.len);
+        nextLineNum = next->num;
+        executeTokens((token*)(void*)(p->str.text));
+        if (next->num != nextLineNum) {
+            p = getCachedLabel(nextLineNum);
+            if (p == NULL) {
+                p = findLine(nextLineNum);
+                addCachedLabel(nextLineNum, (short)((char*)(void*)p - (char*)(void*)prgStore));
+            }
+        } else {
+            p = next;
+        }
+    }
+    signalEndOfCode();
 }
 

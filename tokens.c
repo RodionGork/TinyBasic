@@ -336,7 +336,11 @@ void parseLine(char* line, token* tokens) {
     prevTok = NULL;
     setTokenError(NULL, 0);
     if (parseLineNumber()) {
-        parseStatement();
+        if (*cur != 0) {
+            parseStatement();
+        } else {
+            parseNone();
+        }
     }
 }
 

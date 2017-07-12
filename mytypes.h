@@ -32,4 +32,10 @@ typedef struct varHolder {
     numeric value;
 } __attribute__((packed)) varHolder;
 
+typedef struct labelCacheElem {
+    short num;
+    short offset;
+} __attribute__((packed)) labelCacheElem;
+
 #endif
+
