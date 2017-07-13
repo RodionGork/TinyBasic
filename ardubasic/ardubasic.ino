@@ -1,3 +1,5 @@
+#include "EEPROM.h"
+
 #include "main.h"
 
 #include "tokens.h"
