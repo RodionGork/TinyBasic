@@ -2,23 +2,25 @@
 
 #include "tokens.h"
 
-short sysgetc(void) {
+short filePtr;
+
+short sysGetc(void) {
     return Serial.read();
 }
 
-void sysputc(char c) {
+void sysPutc(char c) {
     Serial.write(c);
 }
 
-short adcread(char channel) {
+short adcRead(char channel) {
     return analogRead(channel);
 }
 
-char pinread(char pin) {
+char pinRead(char pin) {
     return (digitalRead(pin) == HIGH) ? 1 : 0;
 }
 
-void pinout(char pin, char state) {
+void pinOut(char pin, char state) {
     if (state >= 0) {
         pinMode(pin, OUTPUT);
         digitalWrite(pin, state ? HIGH : LOW);
@@ -27,17 +29,28 @@ void pinout(char pin, char state) {
     }
 }
 
-void sysdelay(short ms) {
+void sysDelay(short ms) {
     delay(ms);
 }
 
-void syssave(char id, char* data) {
+void sysQuit(void) {
 }
 
-void sysload(char id, char* data) {
-}
-
-void sysquit(void) {
+char storageOperation(void* data, short size) {
+    short i;
+    if (data == NULL) {
+        filePtr = 0;
+        return;
+    }
+    if (size > 0) {
+        for (i = 0; i < size; i += 1) {
+            EEPROM.write(filePtr++, ((unsigned char*)data)[i]);
+        }
+    } else {
+        for (i = 0; i < size; i += 1) {
+            ((unsigned char*)data)[i] = EEPROM.read(filePtr++);
+        }
+    }
 }
 
 char dataSpace[1200];

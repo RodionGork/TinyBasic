@@ -3,7 +3,14 @@
 
 #define MAX_LINE_LEN 80
 
+#include <limits.h>
+
+#if INT_MAX < 100000
+typedef signed short int numeric;
+#else
 typedef signed long int numeric;
+#endif
+
 
 typedef struct nstring {
     unsigned char len;
