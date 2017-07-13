@@ -42,17 +42,19 @@ char storageOperation(void* data, short size) {
     short i;
     if (data == NULL) {
         filePtr = 0;
-        return;
+        return 1;
     }
     if (size > 0) {
         for (i = 0; i < size; i += 1) {
             EEPROM.write(filePtr++, ((unsigned char*)data)[i]);
         }
     } else {
+        size = -size;
         for (i = 0; i < size; i += 1) {
             ((unsigned char*)data)[i] = EEPROM.read(filePtr++);
         }
     }
+    return 1;
 }
 
 char dataSpace[1200];
