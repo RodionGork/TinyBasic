@@ -4,6 +4,8 @@
 #include "../core/main.h"
 #include "../core/utils.h"
 
+char dataSpace[4096];
+
 FILE* fCurrent;
 short idCurrent = 0;
 
@@ -69,8 +71,15 @@ void sysQuit(void) {
     exit(0);
 }
 
+void sysPoke(unsigned long addr, uchar value) {
+    dataSpace[addr] = value;
+}
+
+uchar sysPeek(unsigned long addr) {
+    return dataSpace[addr];
+}
+
 int main(void) {
-    char dataSpace[4096];
     init(dataSpace, 512);
     dispatch();
     return 0;

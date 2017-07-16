@@ -9,10 +9,12 @@ char* skipDigits(char* s);
 char charInStr(char c, char* s);
 int decFromStr(char* s);
 char isDigit(char c);
+char isDigitBased(char c, char base);
 char isAlpha(char c);
 char isAlNum(char c);
 char isSpace(char c);
 char toUpper(char c);
+char makeDigit(char c, char base);
 
 char input(char* s, short n);
 void outputChar(char c);
@@ -28,6 +30,8 @@ char pinRead(char pin);
 void pinOut(char pin, char state);
 void sysDelay(short ms);
 void sysQuit(void);
+void sysPoke(unsigned long addr, uchar value);
+uchar sysPeek(unsigned long addr);
 char storageOperation(void* data, short size);
 
 #endif

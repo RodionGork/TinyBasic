@@ -16,6 +16,7 @@ char* cmds[] = {
     "END",
     "PIN",
     "DELAY",
+    "POKE",
     ""
 };
 
@@ -127,13 +128,25 @@ char parseName(char checkCmd) {
 }
 
 char parseNumber(void) {
+    char base = 10;
     if (!isDigit(*cur)) {
         return 0;
     }
     curTok->type = TT_NUMBER;
     curTok->body.integer = 0;
-    while (isDigit(*cur)) {
-        curTok->body.integer = curTok->body.integer * 10 + (*cur) - '0';
+    if (cur[0] == '0') {
+        if (toUpper(cur[1]) == 'X') {
+            base = 16;
+            cur += 2;
+        } else if (toUpper(cur[1]) == 'B') {
+            base = 2;
+            cur += 2;
+        } else {
+            base = 8;
+        }
+    }
+    while (isDigitBased(*cur, base)) {
+        curTok->body.integer = curTok->body.integer * base + makeDigit(*cur, base);
         cur++;
     }
     advance(cur);
@@ -322,7 +335,7 @@ char parseStatement(void) {
         return parseConditional();
     } else if (cmd == CMD_DELAY) {
         return parseExpression() && parseNone();
-    } else if (cmd == CMD_PIN) {
+    } else if (cmd == CMD_PIN || cmd == CMD_POKE) {
         return parseTwoExpressions();
     }
     setTokenError(cur, 6);

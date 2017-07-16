@@ -97,13 +97,26 @@ void outputInt(long n) {
 
 int decFromStr(char* s) {
     schar sign = 1;
+    char base = 10;
     int res = 0;
-    if (s[0] == '-') {
+    if (*s == '-') {
         sign = -1;
         s += 1;
     }
-    while (isDigit(*s)) {
-        res = res * 10 + (*s++) - '0';
+    if (*s == '0') {
+        s += 1;
+        if (toUpper(*s) == 'X') {
+            base = 16;
+            s += 1;
+        } else if (toUpper(*s) == 'B') {
+            base = 2;
+            s += 1;
+        } else {
+            base = 8;
+        }
+    }
+    while (isDigitBased(*s, base)) {
+        res = res * base + makeDigit(*s++, base);
     }
     return res * sign;
 }
@@ -123,6 +136,27 @@ char isAlpha(char c) {
 
 char isDigit(char c) {
     return c >= '0' && c <= '9';
+}
+
+char isDigitBased(char c, char base) {
+    if (c < '0') {
+        return 0;
+    } else if (c <= '9') {
+        return base > c - '0';
+    } else {
+        c = toUpper(c);
+        return c >= 'A' && base > c - 'A' + 10;
+    }
+}
+
+char makeDigit(char c, char base) {
+    if (c < '0') {
+        return 0;
+    } else if (c <= '9') {
+        return c - '0';
+    } else {
+        return toUpper(c) - 'A' + 10;
+    }
 }
 
 char isAlNum(char c) {

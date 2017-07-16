@@ -25,6 +25,7 @@ void execReturn(void);
 void execEnd(void);
 void execPin(void);
 void execDelay(void);
+void execPoke(void);
 
 void (*executors[])(void) = {
     execRem,
@@ -37,6 +38,7 @@ void (*executors[])(void) = {
     execEnd,
     execPin,
     execDelay,
+    execPoke,
 };
 
 void resetTokenExecutor(void) {
@@ -183,6 +185,8 @@ void calcFunction(nstring* name) {
         calcStack[sp] = pinRead(calcStack[sp]);
     } else if (memcmp(&(name->text), "ADC", 3) == 0) {
         calcStack[sp] = adcRead(calcStack[sp]);
+    } else if (memcmp(&(name->text), "PEEK", 4) == 0) {
+        calcStack[sp] = sysPeek(calcStack[sp]);
     } else if (memcmp(&(name->text), "ABS", 3) == 0) {
         calcStack[sp] = abs(calcStack[sp]);
     } else {
@@ -300,6 +304,12 @@ void execPin(void) {
 
 void execDelay(void) {
     sysDelay(calcExpression());
+}
+
+void execPoke(void) {
+    unsigned long addr = calcExpression();
+    advanceExecutor();
+    sysPoke(addr, calcExpression());
 }
 
 char executeTokens(token* t) {
