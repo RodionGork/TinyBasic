@@ -3,6 +3,8 @@
 #include "../core/main.h"
 
 #define STACK_TOP 0x20005000
+#define CLOCK_SPEED 36
+#define UART_SPEED 9600
 
 #define PROG_SPACE_SIZE 2048
 #define VARS_SPACE_SIZE 512
@@ -51,13 +53,13 @@ void resetIrqHandler(void) {
 }
 
 int main(void) {
-    setupPll(36);
+    setupPll(CLOCK_SPEED);
     REG_L(RCC_BASE, RCC_APB2ENR) |= (1 << 2); // port A
     
     pinMode(GPIOA_BASE, 1, PIN_MODE_OUT_SLOW, PIN_CNF_O_PP);
     pinOutput(GPIOA_BASE, 1, 1);
     
-    uartEnable(36000000 / 921600);
+    uartEnable(CLOCK_SPEED * 1000000 / UART_SPEED);
     enableInterrupts();
     
     init(dataSpace, VARS_SPACE_SIZE);

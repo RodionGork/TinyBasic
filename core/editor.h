@@ -11,7 +11,7 @@ void initEditor(char* prgBody);
 char readLine(char* line);
 prgline* findLine(short num);
 void injectLine(char* s, short num);
-void editorSave(void);
+char editorSave(void);
 void editorLoad(void);
 void editorLoadParsed(char* lineBuf, token* tokenBuf);
 

@@ -114,10 +114,14 @@ void executeSteps(char* lineBody, token* tokensBody) {
 }
 
 void runSteps(char* lineBody, token* tokensBody) {
-    editorSave();
-    editorLoadParsed(lineBody, tokensBody);
-    executeParsedRun();
-    editorLoad();
+    if (editorSave()) {
+        editorLoadParsed(lineBody, tokensBody);
+        executeParsedRun();
+        editorLoad();
+    } else {
+        while (!executeStep(lineBody, tokensBody)) {
+        }
+    }
 }
 
 void prgReset(void) {

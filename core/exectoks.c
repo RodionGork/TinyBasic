@@ -103,15 +103,6 @@ short findLabel(short num) {
             hi = mid;
         }
     }
-    /*
-    outputStr("find-label: ");
-    outputInt(num);
-    outputChar(' ');
-    outputInt(labelCache[lo].num);
-    outputChar(' ');
-    outputInt(labelCache[lo].offset);
-    outputCr();
-    */
     return lo;
 }
 
@@ -122,13 +113,6 @@ prgline* getCachedLabel(short num) {
 
 void addCachedLabel(short num, short offset) {
     short idx = findLabel(num);
-    /*
-    outputStr("add-label: ");
-    outputInt(num);
-    outputChar(' ');
-    outputInt(offset);
-    outputCr();
-    */
     if (idx < labelsCached) {
         memmove(labelCache + idx + 1, labelCache + idx, sizeof(labelCacheElem) * (labelsCached - idx));
     }

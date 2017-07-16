@@ -59,11 +59,14 @@ void injectLine(char* s, short num) {
     }
 }
 
-void editorSave(void) {
-    storageOperation(NULL, 1);
+char editorSave(void) {
+    if (!storageOperation(NULL, 1)) {
+        return 0;
+    }
     storageOperation(&prgSize, sizeof(prgSize));
     storageOperation(prgStore, prgSize);
     storageOperation(NULL, 0);
+    return 1;
 }
 
 void editorLoad(void) {
