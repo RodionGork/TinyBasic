@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <ctype.h>
 
 #include "utils.h"
 
@@ -18,14 +17,14 @@ void trim(char* s) {
 }
 
 char* skipSpaces(char* s) {
-    while (isspace(*s)) {
+    while (isSpace(*s)) {
         s++;
     }
     return s;
 }
 
 char* skipDigits(char* s) {
-    while (isdigit(*s)) {
+    while (isDigit(*s)) {
         s++;
     }
     return s;
@@ -96,7 +95,50 @@ void outputInt(long n) {
     }
 }
 
+int decFromStr(char* s) {
+    schar sign = 1;
+    int res = 0;
+    if (s[0] == '-') {
+        sign = -1;
+        s += 1;
+    }
+    while (isDigit(*s)) {
+        res = res * 10 + (*s++) - '0';
+    }
+    return res * sign;
+}
+
 void outputCr() {
     sysPutc('\n');
+}
+
+char toUpper(char c) {
+    return (c >= 'a' && c <= 'z') ? c - ('a' - 'A') : c;
+}
+
+char isAlpha(char c) {
+    c = toUpper(c);
+    return c >= 'A' && c <= 'Z';
+}
+
+char isDigit(char c) {
+    return c >= '0' && c <= '9';
+}
+
+char isAlNum(char c) {
+    return isDigit(c) || isAlpha(c);
+}
+
+char isSpace(char c) {
+    switch (c) {
+        case ' ':
+        case '\t':
+        case '\v':
+        case '\n':
+        case '\r':
+        case '\f':
+            return 1;
+    }
+    return 0;
 }
 

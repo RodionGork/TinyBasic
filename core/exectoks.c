@@ -272,7 +272,7 @@ void execInput(void) {
             case TT_VARIABLE:
                 outputStr("? ");
                 input(s, sizeof(s));
-                setVar(shortVarName(&(tcur->body.str)), atoi(s));
+                setVar(shortVarName(&(tcur->body.str)), decFromStr(s));
                 break;
         }
         advanceExecutor();

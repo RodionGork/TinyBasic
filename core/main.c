@@ -1,5 +1,4 @@
 #include <string.h>
-#include <ctype.h>
 
 #include "tokens.h"
 #include "editor.h"

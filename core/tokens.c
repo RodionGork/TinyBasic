@@ -1,4 +1,3 @@
-#include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -111,12 +110,12 @@ void trySubstCmd(void) {
 
 char parseName(char checkCmd) {
     short i = 0;
-    if (!isalpha(*cur)) {
+    if (!isAlpha(*cur)) {
         return 0;
     }
     curTok->type = TT_NAME;
-    while (isalnum(cur[i])) {
-        curTok->body.str.text[i] = toupper(cur[i]);
+    while (isAlNum(cur[i])) {
+        curTok->body.str.text[i] = toUpper(cur[i]);
         i++;
     }
     curTok->body.str.len = i;
@@ -128,12 +127,12 @@ char parseName(char checkCmd) {
 }
 
 char parseNumber(void) {
-    if (!isdigit(*cur)) {
+    if (!isDigit(*cur)) {
         return 0;
     }
     curTok->type = TT_NUMBER;
     curTok->body.integer = 0;
-    while (isdigit(*cur)) {
+    while (isDigit(*cur)) {
         curTok->body.integer = curTok->body.integer * 10 + (*cur) - '0';
         cur++;
     }

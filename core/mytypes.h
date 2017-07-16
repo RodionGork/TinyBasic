@@ -11,6 +11,9 @@ typedef signed short int numeric;
 typedef signed long int numeric;
 #endif
 
+typedef signed char schar;
+
+typedef unsigned char uchar;
 
 typedef struct nstring {
     unsigned char len;

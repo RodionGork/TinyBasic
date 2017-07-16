@@ -7,6 +7,13 @@ void trim(char* s);
 char* skipSpaces(char* s);
 char* skipDigits(char* s);
 char charInStr(char c, char* s);
+int decFromStr(char* s);
+char isDigit(char c);
+char isAlpha(char c);
+char isAlNum(char c);
+char isSpace(char c);
+char toUpper(char c);
+
 char input(char* s, short n);
 void outputChar(char c);
 void outputStr(char* s);

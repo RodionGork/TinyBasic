@@ -87,7 +87,7 @@ char parseExprComma(char inFunc) {
     }
 }
 
-char operatorPriority(char op) {
+schar operatorPriority(char op) {
     switch (op) {
         case '&':
         case '|':
@@ -131,7 +131,7 @@ char convertRpnPop(char op) {
 
 void shuntingYard(token* next) {
     char opstack[16];
-    char sp = -1;
+    schar sp = -1;
     char prio;
     char op;
     char* start = (char*)(void*)next;
