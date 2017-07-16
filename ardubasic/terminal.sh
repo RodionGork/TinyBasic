@@ -1,1 +1,1 @@
-picocom --imap lfcrlf --echo /dev/ttyACM0
+picocom --imap lfcrlf --echo /dev/ttyUSB0

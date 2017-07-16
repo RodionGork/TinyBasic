@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "main.h"
-#include "utils.h"
+#include "../main.h"
+#include "../utils.h"
 
 FILE* fCurrent;
 short idCurrent = 0;
