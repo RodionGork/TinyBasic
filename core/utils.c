@@ -1,6 +1,8 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "utils.h"
+#include "extern.h"
 
 void trim(char* s) {
     short i = 0, k;
@@ -40,6 +42,13 @@ char charInStr(char c, char* s) {
     return 0;
 }
 
+char cmpNStrToStr(nstring* ns, char* s) {
+    if (ns->len != strlen(s)) {
+        return 0;
+    }
+    return memcmp(&(ns->text), s, ns->len) == 0;
+}
+
 char input(char* s, short n) {
     short i = 0;
     short c;
@@ -47,7 +56,6 @@ char input(char* s, short n) {
     while (i < n) {
         c = sysGetc();
         if (c < 0) {
-            sysDelay(1);
             continue;
         }
         if (c == '\r' || c == '\n') {

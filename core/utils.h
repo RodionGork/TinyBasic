@@ -7,6 +7,7 @@ void trim(char* s);
 char* skipSpaces(char* s);
 char* skipDigits(char* s);
 char charInStr(char c, char* s);
+char cmpNStrToStr(nstring* ns, char* s);
 int decFromStr(char* s);
 char isDigit(char c);
 char isDigitBased(char c, char base);
@@ -23,16 +24,9 @@ void outputNStr(nstring* s);
 void outputInt(long n);
 void outputCr();
 
-short sysGetc(void);
-void sysPutc(char c);
 short adcRead(char channel);
 char pinRead(char pin);
-void pinOut(char pin, char state);
-void sysDelay(short ms);
-void sysQuit(void);
-void sysPoke(unsigned long addr, uchar value);
 uchar sysPeek(unsigned long addr);
-char storageOperation(void* data, short size);
 
 #endif
 

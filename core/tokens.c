@@ -4,8 +4,9 @@
 #include "tokens.h"
 #include "expr.h"
 #include "utils.h"
+#include "extern.h"
 
-char* cmds[] = {
+static char* cmds[] = {
     "REM",
     "PRINT",
     "INPUT",
@@ -14,13 +15,9 @@ char* cmds[] = {
     "GOSUB",
     "RETURN",
     "END",
-    "PIN",
-    "DELAY",
-    "POKE",
-    ""
 };
 
-char* errorMsgs[] = {
+static char* errorMsgs[] = {
     "ok",
     "command or variable expected",
     "'=' expected",
@@ -31,7 +28,7 @@ char* errorMsgs[] = {
     "linenum out of range",
     "line number expected",
     "unexpected symbol",
-    
+    "unexpected line end",
 };
 
 char* cur;
@@ -92,19 +89,30 @@ void skipTokenInInput(char offset) {
     cur = skipSpaces(cur + offset);
 }
 
-void advance(char* s) {
+static void advance(char* s) {
     cur = skipSpaces(s);
     prevTok = curTok;
     curTok = nextToken(curTok);
 }
 
+static void substCommandFound(char code) {
+    curTok->type = TT_COMMAND;
+    curTok->body.command = code;
+    nextToken(curTok)->type = TT_ERROR;
+}
+
 void trySubstCmd(void) {
     short i = 0;
-    for (i = 0; cmds[i][0] != 0; i++) {
+    for (i = 0; i < (short) (sizeof(cmds) / sizeof(*cmds)); i++) {
         if (tokenNameEqual(curTok, cmds[i])) {
-            curTok->type = TT_COMMAND;
-            curTok->body.command = i;
-            nextToken(curTok)->type = TT_ERROR;
+            substCommandFound(i);
+            return;
+        }
+    }
+    for (i = 0; extraCmds[i][0]; i++) {
+        if (tokenNameEqual(curTok, extraCmds[i])) {
+            substCommandFound(CMD_EXTRA + i);
+            return;
         }
     }
 }
@@ -279,8 +287,16 @@ char parsePrintList(void) {
     return parseNone();
 }
 
-char parseTwoExpressions(void) {
-    return parseExpression() && parseSemicolon() && parseExpression() && parseNone();
+char parseNExpressions(char cnt) {
+    if (!parseExpression()) {
+        return 0;
+    }
+    while (--cnt > 0) {
+        if (!parseSemicolon() || !parseExpression()) {
+            return 0;
+        }
+    }
+    return parseNone();
 }
 
 char parseLabel(void) {
@@ -333,10 +349,8 @@ char parseStatement(void) {
         return parseVarList();
     } else if (cmd == CMD_IF) {
         return parseConditional();
-    } else if (cmd == CMD_DELAY) {
-        return parseExpression() && parseNone();
-    } else if (cmd == CMD_PIN || cmd == CMD_POKE) {
-        return parseTwoExpressions();
+    } else if (cmd >= CMD_EXTRA) {
+        return parseNExpressions(extraCmdArgCnt[cmd - CMD_EXTRA]);
     }
     setTokenError(cur, 6);
     return 0;
@@ -364,10 +378,7 @@ char tokenNameEqual(token* t, char* s) {
     if (tokenClass(t) != TT_NAME) {
         return 0;
     }
-    if (t->body.str.len != strlen(s)) {
-        return 0;
-    }
-    return memcmp(t->body.str.text, s, t->body.str.len) == 0;
+    return cmpNStrToStr(&(t->body.str), s);
 }
 
 char* getParseErrorPos(void) {

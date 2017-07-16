@@ -5,8 +5,9 @@
 #include "tokens.h"
 #include "editor.h"
 #include "utils.h"
+#include "extern.h"
 
-token* tcur;
+static token* curTok;
 numeric* calcStack;
 short nextLineNum = 1;
 short sp, spInit;
@@ -23,9 +24,6 @@ void execGoto(void);
 void execGosub(void);
 void execReturn(void);
 void execEnd(void);
-void execPin(void);
-void execDelay(void);
-void execPoke(void);
 
 void (*executors[])(void) = {
     execRem,
@@ -36,9 +34,6 @@ void (*executors[])(void) = {
     execGosub,
     execReturn,
     execEnd,
-    execPin,
-    execDelay,
-    execPoke,
 };
 
 void resetTokenExecutor(void) {
@@ -123,9 +118,9 @@ void addCachedLabel(short num, short offset) {
     labelsCached += 1;
 }
 
-void advanceExecutor(void) {
-    if (tcur->type != TT_NONE) {
-        tcur = nextToken(tcur);
+static void advance(void) {
+    if (curTok->type != TT_NONE) {
+        curTok = nextToken(curTok);
     }
 }
 
@@ -181,78 +176,81 @@ void calcOperation(char op) {
 }
 
 void calcFunction(nstring* name) {
-    if (memcmp(&(name->text), "PIN", 3) == 0) {
-        calcStack[sp] = pinRead(calcStack[sp]);
-    } else if (memcmp(&(name->text), "ADC", 3) == 0) {
-        calcStack[sp] = adcRead(calcStack[sp]);
-    } else if (memcmp(&(name->text), "PEEK", 4) == 0) {
-        calcStack[sp] = sysPeek(calcStack[sp]);
-    } else if (memcmp(&(name->text), "ABS", 3) == 0) {
+    numeric i;
+    if (cmpNStrToStr(name, "ABS")) {
         calcStack[sp] = abs(calcStack[sp]);
-    } else {
-        calcStack[sp] = 0;
+        return;
     }
+    for (i = 0; extraFuncs[i][0]; i++) {
+        if (cmpNStrToStr(name, extraFuncs[i])) {
+            i = extraFunction(i, calcStack + sp);
+            sp += extraFuncArgCnt[i] - 1;
+            calcStack[sp] = i;
+            return;
+        }
+    }
+    calcStack[sp] = 0;
 }
 
 numeric calcExpression(void) {
     while (1) {
-        switch (tcur->type) {
+        switch (curTok->type) {
             case TT_NONE:
             case TT_SEPARATOR:
                 return calcStack[sp++];
             case TT_NUMBER:
-                calcStack[--sp] = tcur->body.integer;
+                calcStack[--sp] = curTok->body.integer;
                 break;
             case TT_VARIABLE:
-                calcStack[--sp] = getVar(shortVarName(&(tcur->body.str)));
+                calcStack[--sp] = getVar(shortVarName(&(curTok->body.str)));
                 break;
             case TT_SYMBOL:
-                calcOperation(tcur->body.symbol);
+                calcOperation(curTok->body.symbol);
                 break;
             case TT_FUNCTION:
-                calcFunction(&(tcur->body.str));
+                calcFunction(&(curTok->body.str));
                 break;
         }
-        advanceExecutor();
+        advance();
     }
 }
 
 void execAssignment(void) {
-    short varname = shortVarName(&(tcur->body.str));
-    advanceExecutor();
-    advanceExecutor();
+    short varname = shortVarName(&(curTok->body.str));
+    advance();
+    advance();
     setVar(varname, calcExpression());
 }
 
 void execRem(void) {
-    while (tcur->type != TT_NONE) {
-        advanceExecutor();
+    while (curTok->type != TT_NONE) {
+        advance();
     }
 }
 
 void execPrint(void) {
     while (1) {
-        switch (tcur->type) {
+        switch (curTok->type) {
             case TT_NONE:
                 outputCr();
                 return;
             case TT_SEPARATOR:
                 break;
             case TT_LITERAL:
-                outputNStr(&(tcur->body.str));
+                outputNStr(&(curTok->body.str));
                 break;
             default:
                 outputInt(calcExpression());
                 break;
         }
-        advanceExecutor();
+        advance();
     }
 }
 
 void execInput(void) {
     char s[16];
     while (1) {
-        switch (tcur->type) {
+        switch (curTok->type) {
             case TT_NONE:
                 return;
             case TT_SEPARATOR:
@@ -260,32 +258,32 @@ void execInput(void) {
             case TT_VARIABLE:
                 outputStr("? ");
                 input(s, sizeof(s));
-                setVar(shortVarName(&(tcur->body.str)), decFromStr(s));
+                setVar(shortVarName(&(curTok->body.str)), decFromStr(s));
                 break;
         }
-        advanceExecutor();
+        advance();
     }
 }
 
 void execIf(void) {
     if (calcExpression() == 0) {
-        while (tcur->type != TT_NONE) {
-            advanceExecutor();
+        while (curTok->type != TT_NONE) {
+            advance();
         }
     } else {
-        advanceExecutor();
+        advance();
     }
 }
 
 void execGoto(void) {
-    nextLineNum = tcur->body.integer;
-    advanceExecutor();
+    nextLineNum = curTok->body.integer;
+    advance();
 }
 
 void execGosub(void) {
     calcStack[--sp] = nextLineNum;
-    nextLineNum = tcur->body.integer;
-    advanceExecutor();
+    nextLineNum = curTok->body.integer;
+    advance();
 }
 
 void execReturn(void) {
@@ -296,32 +294,30 @@ void execEnd(void) {
     nextLineNum = 32767;
 }
 
-void execPin(void) {
-    char pin = calcExpression();
-    advanceExecutor();
-    pinOut(pin, calcExpression());
-}
-
-void execDelay(void) {
-    sysDelay(calcExpression());
-}
-
-void execPoke(void) {
-    unsigned long addr = calcExpression();
-    advanceExecutor();
-    sysPoke(addr, calcExpression());
+void execExtra(char cmd) {
+    char n = extraCmdArgCnt[cmd];
+    char i;
+    for (i = 0; i < n; i++) {
+        calcStack[sp - n + i] = calcExpression();
+        advance();
+    }
+    extraCommand(cmd, calcStack + (sp - n));
 }
 
 char executeTokens(token* t) {
-    tcur = t;
+    curTok = t;
     while (t->type != TT_NONE) {
         if (t->type == TT_COMMAND) {
-            advanceExecutor();
-            executors[t->body.command]();
+            advance();
+            if (t->body.command < CMD_EXTRA) {
+                executors[t->body.command]();
+            } else {
+                execExtra(t->body.command - CMD_EXTRA);
+            }
         } else {
             execAssignment();
         }
-        t = tcur;
+        t = curTok;
     }
     return 1;
 }

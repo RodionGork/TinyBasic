@@ -4,6 +4,20 @@
 #include "../core/main.h"
 #include "../core/utils.h"
 
+char* extraCmds[] = {
+    "POKE",
+    "",
+};
+
+char extraCmdArgCnt[] = {2};
+
+char* extraFuncs[] = {
+    "PEEK",
+    "",
+};
+
+char extraFuncArgCnt[] = {1};
+
 char dataSpace[4096];
 
 FILE* fCurrent;
@@ -17,26 +31,32 @@ void sysPutc(char c) {
     putc(c, stdout);
 }
 
-short adcRead(char channel) {
+void sysQuit(void) {
+    exit(0);
+}
+
+void sysPoke(unsigned long addr, uchar value) {
+    dataSpace[addr] = value;
+}
+
+uchar sysPeek(unsigned long addr) {
+    return dataSpace[addr];
+}
+
+void extraCommand(char cmd, numeric args[]) {
+    switch (cmd) {
+        case 0:
+            sysPoke(args[0], args[1]);
+            break;
+    }
+}
+
+numeric extraFunction(char cmd, numeric args[]) {
+    switch (cmd) {
+        case 0:
+            return sysPeek(args[0]);
+    }
     return 0;
-}
-
-char pinRead(char pin) {
-    return 0;
-}
-
-void pinOut(char pin, char state) {
-    outputStr("pinout: ");
-    outputInt(pin);
-    outputChar(',');
-    outputInt(state);
-    outputCr();
-}
-
-void sysDelay(short ms) {
-    outputStr("delay: ");
-    outputInt(ms);
-    outputCr();
 }
 
 FILE* openStorage(char id, char op) {
@@ -65,18 +85,6 @@ char storageOperation(void* data, short size) {
         fread(data, -size, 1, fCurrent);
     }
     return 1;
-}
-
-void sysQuit(void) {
-    exit(0);
-}
-
-void sysPoke(unsigned long addr, uchar value) {
-    dataSpace[addr] = value;
-}
-
-uchar sysPeek(unsigned long addr) {
-    return dataSpace[addr];
 }
 
 int main(void) {

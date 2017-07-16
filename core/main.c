@@ -4,6 +4,7 @@
 #include "editor.h"
 #include "exectoks.h"
 #include "utils.h"
+#include "extern.h"
 
 short listLine, listPage;
 

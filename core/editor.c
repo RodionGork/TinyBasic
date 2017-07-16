@@ -3,6 +3,7 @@
 #include "editor.h"
 #include "utils.h"
 #include "tokens.h"
+#include "extern.h"
 
 char* prgStore;
 short prgSize;

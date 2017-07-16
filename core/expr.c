@@ -190,6 +190,10 @@ char parseExpression(void) {
     char iFuncBr = 0;
     char state = '1';
     funcBrackets[iFuncBr] = 0;
+    if (*getCurTokPos() == 0) {
+        setTokenError(getCurTokPos(), 10);
+        return 0;
+    }
     while (state != 's') {
         switch (state) {
             case '1':
