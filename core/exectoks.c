@@ -3,11 +3,11 @@
 
 #include "mytypes.h"
 #include "tokens.h"
+#include "tokenint.h"
 #include "editor.h"
 #include "utils.h"
 #include "extern.h"
 
-static token* curTok;
 numeric* calcStack;
 short nextLineNum = 1;
 short sp, spInit;

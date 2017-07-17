@@ -4,10 +4,41 @@
 
 #include "tokens.h"
 
+#define PROG_SPACE_SIZE 1000
+#define VARS_SPACE_SIZE 200
+
+char* extraCmds[] = {
+    "POKE",
+    "PIN",
+    "DELAY",
+    "",
+};
+
+char extraCmdArgCnt[] = {2, 2, 1};
+
+char* extraFuncs[] = {
+    "PEEK",
+    "PIN",
+    "ADC",
+    "",
+};
+
+char dataSpace[VARS_SPACE_SIZE + PROG_SPACE_SIZE];
+
+char extraFuncArgCnt[] = {1, 1, 1};
+
 short filePtr;
 
 short sysGetc(void) {
-    return Serial.read();
+    short c = Serial.read();
+    if (c >= ' ') {
+      Serial.write(c);
+    }
+    if (c == '\r') {
+      Serial.write('\r');
+      Serial.write('\n');
+    }
+    return c;
 }
 
 void sysPutc(char c) {
@@ -31,11 +62,41 @@ void pinOut(char pin, char state) {
     }
 }
 
-void sysDelay(short ms) {
-    delay(ms);
+void poke(short addr, uchar value) {
+    *((uchar*) addr) = value;
+}
+
+uchar peek(short addr) {
+    return *((uchar*) addr);
 }
 
 void sysQuit(void) {
+}
+
+void extraCommand(char cmd, numeric args[]) {
+    switch (cmd) {
+        case 0:
+            poke(args[0], args[1]);
+            break;
+        case 1:
+            pinOut(args[0], args[1]);
+            break;
+        case 2:
+            delay(args[0]);
+            break;
+    }
+}
+
+numeric extraFunction(char cmd, numeric args[]) {
+    switch (cmd) {
+        case 0:
+            return peek(args[0]);
+        case 1:
+            return pinRead(args[0]);
+        case 2:
+            return adcRead(args[0]);
+    }
+    return 0;
 }
 
 char storageOperation(void* data, short size) {
@@ -57,11 +118,9 @@ char storageOperation(void* data, short size) {
     return 1;
 }
 
-char dataSpace[1200];
-
 void setup() {
     Serial.begin(115200);
-    init(dataSpace, 200);
+    init(dataSpace, VARS_SPACE_SIZE);
 }
 
 void loop() {

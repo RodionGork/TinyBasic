@@ -1,3 +1,2 @@
-*.ino
+*.cpp
 *.h
-!ardubasic.ino

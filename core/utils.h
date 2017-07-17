@@ -24,9 +24,5 @@ void outputNStr(nstring* s);
 void outputInt(long n);
 void outputCr();
 
-short adcRead(char channel);
-char pinRead(char pin);
-uchar sysPeek(unsigned long addr);
-
 #endif
 
