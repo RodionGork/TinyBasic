@@ -176,16 +176,17 @@ void calcOperation(char op) {
 }
 
 void calcFunction(nstring* name) {
-    numeric i;
+    short i;
+    numeric r;
     if (cmpNStrToStr(name, "ABS")) {
         calcStack[sp] = abs(calcStack[sp]);
         return;
     }
     for (i = 0; extraFuncs[i][0]; i++) {
         if (cmpNStrToStr(name, extraFuncs[i])) {
-            i = extraFunction(i, calcStack + sp);
+            r = extraFunction(i, calcStack + sp);
             sp += extraFuncArgCnt[i] - 1;
-            calcStack[sp] = i;
+            calcStack[sp] = r;
             return;
         }
     }

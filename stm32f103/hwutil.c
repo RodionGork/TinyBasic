@@ -1,5 +1,7 @@
 #include "stm32f103.h"
 
+#include "../core/utils.h"
+
 #define UART_RX_BUF_SIZE 8
 
 #define uchar unsigned char
@@ -7,6 +9,27 @@
 char hex[] = "0123456789ABCDEF";
 unsigned char uartRxBuf[UART_RX_BUF_SIZE];
 char uartRxBufStart, uartRxBufEnd;
+
+char* extraCmds[] = {
+    "POKE",
+    "POKE2",
+    "POKE4",
+    "PIN",
+    "DELAY",
+    "",
+};
+
+char extraCmdArgCnt[] = {2, 2, 2, 2, 1};
+
+char* extraFuncs[] = {
+    "PEEK",
+    "PEEK2",
+    "PEEK4",
+    "PIN",
+    "",
+};
+
+char extraFuncArgCnt[] = {1, 1, 1, 1};
 
 void enableInterrupts(void) {
     __asm("cpsie i");
@@ -31,6 +54,10 @@ void pinOutput(int base, char num, char v) {
         num += 16;
     }
     REG_L(base, GPIO_BSRR) |= 1 << num;
+}
+
+char pinInput(int base, char num) {
+    return (REG_L(base, GPIO_IDR) & (1 << num)) ? 1 : 0;
 }
 
 void uartEnable(int divisor) {
@@ -158,6 +185,9 @@ void* memmove(void* dst, const void* src, int sz) {
 }
 
 void sysPutc(char c) {
+    if (c == '\n') {
+        uartSend('\r');
+    }
     uartSend(c);
 }
 
@@ -178,18 +208,66 @@ short adcRead(char channel) {
 }
 
 short pinRead(char pin) {
-    return 0;
+    return pinInput(GPIOA_BASE, pin);
 }
 
 void pinOut(char pin, char state) {
+    if (state >= 0) {
+        pinMode(GPIOA_BASE, pin, PIN_MODE_OUT, PIN_CNF_O_PP);
+        pinOutput(GPIOA_BASE, pin, state);
+    } else {
+        pinMode(GPIOA_BASE, pin, PIN_MODE_IN, state == -1 ? PIN_CNF_I_FLT : PIN_CNF_I_PULL);
+        if (state < -1) {
+            pinOutput(GPIOA_BASE, pin, state == -2 ? 1 : 0);
+        }
+    }
 }
 
 void sysDelay(short ms) {
+    int i;
+    for (i = 2835 * ms; i > 0; i--) {
+        __asm("nop");
+    }
 }
 
 void sysQuit(void) {
 }
 
+void extraCommand(char cmd, numeric args[]) {
+    switch (cmd) {
+        case 0:
+            *((unsigned char*)(args[0])) = (unsigned char) args[1];
+            break;
+        case 1:
+            *((unsigned short*)(args[0])) = (unsigned short) args[1];
+            break;
+        case 2:
+            *((unsigned long*)(args[0])) = (unsigned long) args[1];
+            break;
+        case 3:
+            pinOut(args[0], args[1]);
+            break;
+        case 4:
+            sysDelay(args[0]);
+            break;
+    }
+}
+
+numeric extraFunction(char cmd, numeric args[]) {
+    switch (cmd) {
+        case 0:
+            return *((unsigned char*)(args[0]));
+        case 1:
+            return *((unsigned short*)(args[0]));
+        case 2:
+            return *((unsigned long*)(args[0]));
+        case 3:
+            return pinRead(args[0]);
+    }
+    return 0;
+}
+
 char storageOperation(void* data, short size) {
     return 0;
 }
+
