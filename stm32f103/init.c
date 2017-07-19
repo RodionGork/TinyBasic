@@ -3,7 +3,7 @@
 #include "../core/main.h"
 
 #define STACK_TOP 0x20005000
-#define CLOCK_SPEED 36
+#define CLOCK_SPEED 48
 #define UART_SPEED 9600
 
 #define PROG_SPACE_SIZE 2048

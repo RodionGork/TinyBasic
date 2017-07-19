@@ -65,6 +65,9 @@ void uartEnable(int divisor) {
     pinMode(GPIOA_BASE, 9, PIN_MODE_OUT, PIN_CNF_O_APP);
     REG_L(AFIO_BASE, AFIO_MAPR) &= ~(1 << 2); // no UART1 remap
     REG_L(RCC_BASE, RCC_APB2ENR) |= (1 << 14); // UART clock
+    if (REG_L(RCC_BASE, RCC_CFGR) & (4 << 11)) {
+        divisor /= 2;
+    }
     REG_L(USART_BASE, USART_BRR) |= divisor;
     REG_L(USART_BASE, USART_CR1) |= (1 << 13); // UART enable
     REG_L(USART_BASE, USART_CR1) |= (3 << 2); // UART transmit/receive enable
@@ -128,11 +131,13 @@ void uartSendDec(int x) {
 
 void setupPll(int mhz) {
     int boost = mhz / 4 - 2;
-    REG_L(RCC_BASE, RCC_CR) &= ~(1 << 24); // PLLON = 0
-    while ((REG_L(RCC_BASE, RCC_CR) | (1 << 25)) == 0);
+    REG_L(RCC_BASE, RCC_CR) &= ~(1 << 24);
+    while ((REG_L(RCC_BASE, RCC_CR) & (1 << 25)) != 0);
     REG_L(RCC_BASE, RCC_CFGR) = (boost & 0xF) << 18;
-    REG_L(RCC_BASE, RCC_CR) |= (1 << 24); // PLLON = 1
-    while ((REG_L(RCC_BASE, RCC_CR) | (1 << 25)) == 0);
+    REG_L(RCC_BASE, RCC_CFGR) |= (4 << 11); // APB2 / 2
+    REG_L(RCC_BASE, RCC_CFGR) |= (4 << 8); // APB1 / 2
+    REG_L(RCC_BASE, RCC_CR) |= (1 << 24);
+    while ((REG_L(RCC_BASE, RCC_CR) & (1 << 25)) == 0);
     REG_L(RCC_BASE, RCC_CFGR) |= (1 << 1);
     while (((REG_L(RCC_BASE, RCC_CFGR) >> 2) & 0x3) != 2);
 }
@@ -211,7 +216,7 @@ short pinRead(char pin) {
     return pinInput(GPIOA_BASE, pin);
 }
 
-void pinOut(char pin, char state) {
+void pinOut(char pin, schar state) {
     if (state >= 0) {
         pinMode(GPIOA_BASE, pin, PIN_MODE_OUT, PIN_CNF_O_PP);
         pinOutput(GPIOA_BASE, pin, state);
