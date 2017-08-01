@@ -8,6 +8,7 @@ extern char extraFuncArgCnt[];
 
 short sysGetc(void);
 void sysPutc(char c);
+void sysEcho(char c);
 void extraCommand(char cmd, numeric args[]);
 numeric extraFunction(char cmd, numeric args[]);
 void sysQuit(void);

@@ -31,6 +31,9 @@ void sysPutc(char c) {
     putc(c, stdout);
 }
 
+void sysEcho(char c) {
+}
+
 void sysQuit(void) {
     exit(0);
 }

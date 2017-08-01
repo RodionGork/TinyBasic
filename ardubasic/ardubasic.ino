@@ -30,22 +30,21 @@ char extraFuncArgCnt[] = {1, 1, 1};
 short filePtr;
 
 short sysGetc(void) {
-    short c = Serial.read();
-    if (c >= ' ') {
-      Serial.write(c);
-    }
-    if (c == '\r') {
-      Serial.write('\r');
-      Serial.write('\n');
-    }
-    return c;
+    return Serial.read();
 }
 
 void sysPutc(char c) {
     if (c == '\n') {
       Serial.write('\r');
+    } else if (c == '\b') {
+        Serial.write('\b');
+        Serial.write(' ');
     }
     Serial.write(c);
+}
+
+void sysEcho(char c) {
+    sysPutc(c);
 }
 
 short adcRead(char channel) {

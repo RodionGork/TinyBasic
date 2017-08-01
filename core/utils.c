@@ -61,8 +61,15 @@ char input(char* s, short n) {
         if (c == '\r' || c == '\n') {
             break;
         }
+        if ((c == '\b' || c == 127) && i > 0) {
+            sysEcho('\b');
+            i -= 1;
+            continue;
+        }
         s[i++] = c;
+        sysEcho(c);
     }
+    sysEcho('\n');
     s[i] = 0;
     return 1;
 }

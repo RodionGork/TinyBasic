@@ -192,20 +192,19 @@ void* memmove(void* dst, const void* src, int sz) {
 void sysPutc(char c) {
     if (c == '\n') {
         uartSend('\r');
+    } else if (c == '\b') {
+        uartSend('\b');
+        uartSend(' ');
     }
     uartSend(c);
 }
 
+void sysEcho(char c) {
+    sysPutc(c);
+}
+
 short sysGetc(void) {
-    short c = uartRead();
-    if (c >= ' ') {
-        uartSend(c);
-    }
-    if (c == '\r') {
-        uartSend('\r');
-        uartSend('\n');
-    }
-    return c;
+    return uartRead();
 }
 
 short adcRead(char channel) {
