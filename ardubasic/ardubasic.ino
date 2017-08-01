@@ -4,8 +4,8 @@
 
 #include "tokens.h"
 
-#define PROG_SPACE_SIZE 1000
-#define VARS_SPACE_SIZE 200
+#define PROG_SPACE_SIZE 600
+#define VARS_SPACE_SIZE 150
 
 char* extraCmds[] = {
     "POKE",
@@ -42,6 +42,9 @@ short sysGetc(void) {
 }
 
 void sysPutc(char c) {
+    if (c == '\n') {
+      Serial.write('\r');
+    }
     Serial.write(c);
 }
 
@@ -119,7 +122,7 @@ char storageOperation(void* data, short size) {
 }
 
 void setup() {
-    Serial.begin(115200);
+    Serial.begin(9600);
     init(dataSpace, VARS_SPACE_SIZE);
 }
 
