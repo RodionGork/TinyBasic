@@ -47,6 +47,19 @@ void sysEcho(char c) {
     sysPutc(c);
 }
 
+char sysBreak(char v) {
+    short x;
+    while (1) {
+        x = uartRead();
+        if (x < 0) {
+            return 0;
+        }
+        if (x == 0x03) {
+            return 1;
+        }
+    }
+}
+
 short adcRead(char channel) {
     return analogRead(channel);
 }

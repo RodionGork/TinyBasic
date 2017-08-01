@@ -115,12 +115,17 @@ void executeSteps(char* lineBody, token* tokensBody) {
 }
 
 void runSteps(char* lineBody, token* tokensBody) {
+    sysBreak(0);
     if (editorSave()) {
         editorLoadParsed(lineBody, tokensBody);
         executeParsedRun();
         editorLoad();
     } else {
         while (!executeStep(lineBody, tokensBody)) {
+            if (sysBreak(1)) {
+                execBreak();
+                break;
+            }
         }
     }
 }

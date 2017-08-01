@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #include "../core/main.h"
 #include "../core/utils.h"
@@ -22,6 +23,7 @@ char dataSpace[4096];
 
 FILE* fCurrent;
 short idCurrent = 0;
+volatile char interrupted;
 
 short sysGetc(void) {
     return getc(stdin);
@@ -32,6 +34,14 @@ void sysPutc(char c) {
 }
 
 void sysEcho(char c) {
+}
+
+char sysBreak(char v) {
+    if (v == 0) {
+        interrupted = 0;
+        return 0;
+    }
+    return interrupted;
 }
 
 void sysQuit(void) {
@@ -90,7 +100,16 @@ char storageOperation(void* data, short size) {
     return 1;
 }
 
+void sigintHandler(int v) {
+    interrupted = 1;
+}
+
+void initSystem(void) {
+    signal(SIGINT, sigintHandler);
+}
+
 int main(void) {
+    initSystem();
     init(dataSpace, 512);
     dispatch();
     return 0;

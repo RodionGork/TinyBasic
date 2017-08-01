@@ -341,6 +341,12 @@ char executeStep(char* lineBuf, token* tokenBuf) {
     return 0;
 }
 
+void execBreak() {
+    outputStr("BREAK");
+    outputCr();
+    sp = spInit;
+}
+
 void executeParsedRun(void) {
     prgline* p = findLine(nextLineNum);
     prgline* next;
@@ -361,6 +367,10 @@ void executeParsedRun(void) {
             }
         } else {
             p = next;
+        }
+        if (sysBreak(1)) {
+            execBreak();
+            return;
         }
     }
     signalEndOfCode();
