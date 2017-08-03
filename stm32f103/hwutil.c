@@ -1,14 +1,21 @@
 #include "stm32f103.h"
+#include "stdlib.h"
 
 #include "../core/utils.h"
 
 #define UART_RX_BUF_SIZE 8
+
+#define STORAGE_START ((64 - 16) * 1024)
+#define STORAGE_PAGE_SIZE 1024
 
 #define uchar unsigned char
 
 char hex[] = "0123456789ABCDEF";
 unsigned char uartRxBuf[UART_RX_BUF_SIZE];
 char uartRxBufStart, uartRxBufEnd;
+
+uchar writeOddChar;
+unsigned short writePos;
 
 char* extraCmds[] = {
     "POKE",
@@ -284,7 +291,44 @@ numeric extraFunction(char cmd, numeric args[]) {
     return 0;
 }
 
+static void storageSend(uchar c) {
+    if ((writePos & 1) == 0) {
+        writeOddChar = c;
+        if (writePos % STORAGE_PAGE_SIZE == 0) {
+            REG_L(FLASH_BASE, FLASH_CR) = (1 << 1);
+            REG_L(FLASH_BASE, FLASH_AR) = (FLASH_START + STORAGE_START + writePos);
+            REG_L(FLASH_BASE, FLASH_CR) |= (1 << 6);
+            while ((REG_L(FLASH_BASE, FLASH_SR) & 1) != 0) {
+                __asm("nop");
+            }
+            REG_L(FLASH_BASE, FLASH_CR) &= ~((1 << 1) | (1 << 6));
+        }
+    } else {
+        REG_L(FLASH_BASE, FLASH_CR) = (1 << 0);
+        REG_S(FLASH_START + STORAGE_START, writePos & ~1) = (((unsigned short) c) << 8) | writeOddChar;
+        while ((REG_L(FLASH_BASE, FLASH_SR) & 1) != 0) {
+            __asm("nop");
+        }
+        REG_L(FLASH_BASE, FLASH_CR) &= ~(1 << 0);
+    }
+    writePos += 1;
+}
+
 char storageOperation(void* data, short size) {
-    return 0;
+    if (data == NULL) {
+        if (size) {
+            writePos = 0;
+        } else {
+            if ((writePos & 1) != 0) {
+                storageSend(0xFF);
+            }
+        }
+    } else {
+        while (size-- > 0) {
+            storageSend(*((uchar*)data));
+            data = (void*)(((uchar*)data) + 1);
+        }
+    }
+    return 1;
 }
 

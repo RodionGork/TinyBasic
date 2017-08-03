@@ -56,8 +56,8 @@ int main(void) {
     setupPll(CLOCK_SPEED);
     REG_L(RCC_BASE, RCC_APB2ENR) |= (1 << 2); // port A
     
-    pinMode(GPIOA_BASE, 1, PIN_MODE_OUT_SLOW, PIN_CNF_O_PP);
-    pinOutput(GPIOA_BASE, 1, 1);
+    REG_L(FLASH_BASE, FLASH_KEYR) = 0x45670123;
+    REG_L(FLASH_BASE, FLASH_KEYR) = 0xCDEF89AB;
     
     uartEnable(CLOCK_SPEED * 1000000 / UART_SPEED);
     enableInterrupts();
