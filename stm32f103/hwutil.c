@@ -15,7 +15,7 @@ unsigned char uartRxBuf[UART_RX_BUF_SIZE];
 char uartRxBufStart, uartRxBufEnd;
 
 uchar writeOddChar;
-unsigned short writePos;
+unsigned short storagePos;
 
 char* extraCmds[] = {
     "POKE",
@@ -292,11 +292,11 @@ numeric extraFunction(char cmd, numeric args[]) {
 }
 
 static void storageSend(uchar c) {
-    if ((writePos & 1) == 0) {
+    if ((storagePos & 1) == 0) {
         writeOddChar = c;
-        if (writePos % STORAGE_PAGE_SIZE == 0) {
+        if (storagePos % STORAGE_PAGE_SIZE == 0) {
             REG_L(FLASH_BASE, FLASH_CR) = (1 << 1);
-            REG_L(FLASH_BASE, FLASH_AR) = (FLASH_START + STORAGE_START + writePos);
+            REG_L(FLASH_BASE, FLASH_AR) = (FLASH_START + STORAGE_START + storagePos);
             REG_L(FLASH_BASE, FLASH_CR) |= (1 << 6);
             while ((REG_L(FLASH_BASE, FLASH_SR) & 1) != 0) {
                 __asm("nop");
@@ -305,28 +305,35 @@ static void storageSend(uchar c) {
         }
     } else {
         REG_L(FLASH_BASE, FLASH_CR) = (1 << 0);
-        REG_S(FLASH_START + STORAGE_START, writePos & ~1) = (((unsigned short) c) << 8) | writeOddChar;
+        REG_S(FLASH_START + STORAGE_START, storagePos & ~1) = (((unsigned short) c) << 8) | writeOddChar;
         while ((REG_L(FLASH_BASE, FLASH_SR) & 1) != 0) {
             __asm("nop");
         }
         REG_L(FLASH_BASE, FLASH_CR) &= ~(1 << 0);
     }
-    writePos += 1;
+    storagePos += 1;
 }
 
 char storageOperation(void* data, short size) {
+    short i;
     if (data == NULL) {
         if (size) {
-            writePos = 0;
+            storagePos = 0;
         } else {
-            if ((writePos & 1) != 0) {
+            if ((storagePos & 1) != 0) {
                 storageSend(0xFF);
             }
         }
     } else {
-        while (size-- > 0) {
-            storageSend(*((uchar*)data));
-            data = (void*)(((uchar*)data) + 1);
+        if (size > 0) {
+            for (i = 0; i < size; i++) {
+                storageSend(((uchar*)data)[i]);
+            }
+        } else {
+            for (i = -size -1; i >= 0; i--) {
+                ((uchar*)data)[i] = REG_B(FLASH_START + STORAGE_START, storagePos + i);
+            }
+            storagePos += -size;
         }
     }
     return 1;
