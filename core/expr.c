@@ -1,6 +1,4 @@
-#include <stdlib.h>
-#include <string.h>
-
+#include "mystdlib.h"
 #include "tokens.h"
 #include "tokenint.h"
 #include "expr.h"

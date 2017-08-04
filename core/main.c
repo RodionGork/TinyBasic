@@ -1,5 +1,4 @@
-#include <string.h>
-
+#include "mystdlib.h"
 #include "tokens.h"
 #include "editor.h"
 #include "exectoks.h"

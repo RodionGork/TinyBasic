@@ -1,6 +1,4 @@
-#include <string.h>
-#include <stdlib.h>
-
+#include "mystdlib.h"
 #include "tokens.h"
 #include "expr.h"
 #include "utils.h"

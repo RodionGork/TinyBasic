@@ -1,6 +1,4 @@
-#include <stdlib.h>
-#include <string.h>
-
+#include "mystdlib.h"
 #include "mytypes.h"
 #include "tokens.h"
 #include "tokenint.h"
@@ -179,7 +177,9 @@ void calcFunction(nstring* name) {
     short i;
     numeric r;
     if (cmpNStrToStr(name, "ABS")) {
-        calcStack[sp] = abs(calcStack[sp]);
+        if (calcStack[sp] < 0) {
+            calcStack[sp] = -calcStack[sp];
+        }
         return;
     }
     for (i = 0; extraFuncs[i][0]; i++) {

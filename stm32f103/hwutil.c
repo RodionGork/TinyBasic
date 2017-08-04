@@ -103,7 +103,9 @@ void uartIrqHandler(void) {
 }
 
 void uartSend(int c) {
-    while ((REG_L(USART_BASE, USART_SR) & (1 << 7)) == 0);
+    while ((REG_L(USART_BASE, USART_SR) & (1 << 7)) == 0) {
+        __asm("nop");
+    }
     REG_L(USART_BASE, USART_DR) = c;
 }
 
@@ -139,14 +141,20 @@ void uartSendDec(int x) {
 void setupPll(int mhz) {
     int boost = mhz / 4 - 2;
     REG_L(RCC_BASE, RCC_CR) &= ~(1 << 24);
-    while ((REG_L(RCC_BASE, RCC_CR) & (1 << 25)) != 0);
+    while ((REG_L(RCC_BASE, RCC_CR) & (1 << 25)) != 0) {
+        __asm("nop");
+    }
     REG_L(RCC_BASE, RCC_CFGR) = (boost & 0xF) << 18;
     REG_L(RCC_BASE, RCC_CFGR) |= (4 << 11); // APB2 / 2
     REG_L(RCC_BASE, RCC_CFGR) |= (4 << 8); // APB1 / 2
     REG_L(RCC_BASE, RCC_CR) |= (1 << 24);
-    while ((REG_L(RCC_BASE, RCC_CR) & (1 << 25)) == 0);
+    while ((REG_L(RCC_BASE, RCC_CR) & (1 << 25)) == 0) {
+        __asm("nop");
+    }
     REG_L(RCC_BASE, RCC_CFGR) |= (1 << 1);
-    while (((REG_L(RCC_BASE, RCC_CFGR) >> 2) & 0x3) != 2);
+    while (((REG_L(RCC_BASE, RCC_CFGR) >> 2) & 0x3) != 2) {
+        __asm("nop");
+    }
 }
 
 int strlen(const char* s) {

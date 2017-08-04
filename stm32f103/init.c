@@ -33,8 +33,8 @@ const void * intVectors[76] __attribute__((section(".vectors"))) = {
 };
 
 void memoryInit(void) {
-    unsigned char *src;
-    unsigned char *dest;
+    unsigned char volatile *src;
+    unsigned char volatile *dest;
     unsigned len;
     src= &INIT_DATA_VALUES;
     dest= &INIT_DATA_START;
