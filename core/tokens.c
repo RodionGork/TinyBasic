@@ -226,22 +226,6 @@ char parseLineNumber(void) {
     return 1;
 }
 
-char parseAssignment(void) {
-    if (*cur != '=') {
-        setTokenError(cur, 2);
-        return 0;
-    }
-    parseSymbol();
-    return parseExpression() && parseNone();
-}
-
-char parseExprOrLiteral(void) {
-    if (parseLiteral()) {
-        return 1;
-    }
-    return parseExpression();
-}
-
 char parseSemicolon(void) {
     if (*cur != ';') {
         setTokenError(cur, 4);
@@ -250,6 +234,88 @@ char parseSemicolon(void) {
     curTok->type = TT_SEPARATOR;
     advance(cur + 1);
     return 1;
+}
+
+char* skipSubscripts() {
+    char* p = cur;
+    char br = 0;
+    while (*p != 0) {
+        if (*p == '(') {
+            br += 1;
+        } else if (*p == ')') {
+            br -= 1;
+            if (br == 0) {
+                break;
+            }
+        }
+        p++;
+    }
+    return p;
+}
+
+char assignmentSyntax(void) {
+    char* p;
+    if (*cur == '=') {
+        return CMD_LET;
+    } else if (*cur != '(') {
+        setTokenError(cur, 2);
+        return 0;
+    }
+    p = skipSubscripts();
+    if (*p == 0) {
+        setTokenError(p, 10);
+        return 0;
+    }
+    p = skipSpaces(p + 1);
+    if (*p != '=') {
+        setTokenError(cur, 2);
+        return 0;
+    }
+    return CMD_LETA;
+}
+
+char parseSubscripts(void) {
+    char* p = skipSubscripts();
+    *p = ';';
+    cur++;
+    if (!parseExpression()) {
+        return 0;
+    }
+    parseSemicolon();
+    *p = ' ';
+    return 1;
+}
+
+char parseAssignment(void) {
+    char synt = assignmentSyntax();
+    if (!synt) {
+        return 0;
+    }
+    curTok->type = TT_COMMAND;
+    memmove((char*)(void*)prevTok + tokenSize(curTok), prevTok, tokenSize(prevTok));
+    prevTok->type = TT_COMMAND;
+    prevTok->body.command = synt;
+    curTok = nextToken(prevTok);
+    if (synt == CMD_LETA) {
+        curTok->type = TT_SYMBOL;
+        curTok->body.symbol = curTok->body.str.text[0];
+    }
+    prevTok = curTok;
+    curTok = nextToken(curTok);
+    if (synt == CMD_LETA) {
+        if (!parseSubscripts()) {
+            return 0;
+        }
+    }
+    cur = skipSpaces(cur + 1);
+    return parseExpression() && parseNone();
+}
+
+char parseExprOrLiteral(void) {
+    if (parseLiteral()) {
+        return 1;
+    }
+    return parseExpression();
 }
 
 char parseVar(void) {

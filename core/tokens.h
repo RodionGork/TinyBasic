@@ -22,6 +22,8 @@
 #define CMD_GOSUB 5
 #define CMD_RETURN 6
 #define CMD_END 7
+#define CMD_LET 8
+#define CMD_LETA 9
 #define CMD_EXTRA 0x40
 
 #define MAX_LINE_NUMBER 30000

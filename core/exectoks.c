@@ -22,6 +22,8 @@ void execGoto(void);
 void execGosub(void);
 void execReturn(void);
 void execEnd(void);
+void execLet(void);
+void execLeta(void);
 
 void (*executors[])(void) = {
     execRem,
@@ -32,6 +34,8 @@ void (*executors[])(void) = {
     execGosub,
     execReturn,
     execEnd,
+    execLet,
+    execLeta,
 };
 
 void resetTokenExecutor(void) {
@@ -216,11 +220,13 @@ numeric calcExpression(void) {
     }
 }
 
-void execAssignment(void) {
+void execLet(void) {
     short varname = shortVarName(&(curTok->body.str));
     advance();
-    advance();
     setVar(varname, calcExpression());
+}
+
+void execLeta(void) {
 }
 
 void execRem(void) {
@@ -308,15 +314,11 @@ void execExtra(char cmd) {
 char executeTokens(token* t) {
     curTok = t;
     while (t->type != TT_NONE) {
-        if (t->type == TT_COMMAND) {
-            advance();
-            if (t->body.command < CMD_EXTRA) {
-                executors[t->body.command]();
-            } else {
-                execExtra(t->body.command - CMD_EXTRA);
-            }
+        advance();
+        if (t->body.command < CMD_EXTRA) {
+            executors[t->body.command]();
         } else {
-            execAssignment();
+            execExtra(t->body.command - CMD_EXTRA);
         }
         t = curTok;
     }
