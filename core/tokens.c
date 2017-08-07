@@ -13,18 +13,19 @@ static char* cmds[] = {
     "GOSUB",
     "RETURN",
     "END",
+    "DIM",
 };
 
 static char* errorMsgs[] = {
     "ok",
     "command or variable expected",
     "'=' expected",
-    "variable name expected",
+    "name expected",
     "';' expected",
     "extra characters at line end",
     "unexpected error",
     "linenum out of range",
-    "line number expected",
+    "number expected",
     "unexpected symbol",
     "unexpected line end",
 };
@@ -209,7 +210,7 @@ char parseSymbol() {
     } else {
         c = cur[0];
     }
-    curTok->body.symbol = c;
+    curTok->body.symbol = toUpper(c);
     advance(cur + 1);
     return 1;
 }
@@ -380,6 +381,24 @@ char parseConditional(void) {
     return parseSemicolon() && parseStatement();
 }
 
+char parseAllocate() {
+    if (!parseName(0)) {
+        setTokenError(cur, 3);
+        return 0;
+    }
+    if (!parseNumber()) {
+        setTokenError(cur, 8);
+        return 0;
+    }
+    if (*cur != 0) {
+        if (!parseSymbol() || prevTok->body.symbol != 'B') {
+            setTokenError(cur, 9);
+            return 0;
+        }
+    }
+    return parseNone();
+}
+
 void parseSpecialWithError() {
     curTok = nextToken(curTok);
     while (parseName(0) || parseNumber() || parseLiteral()) {
@@ -413,6 +432,8 @@ char parseStatement(void) {
         return parseVarList();
     } else if (cmd == CMD_IF) {
         return parseConditional();
+    } else if (cmd == CMD_DIM) {
+        return parseAllocate();
     } else if (cmd >= CMD_EXTRA) {
         return parseNExpressions(extraCmdArgCnt[cmd - CMD_EXTRA]);
     }
