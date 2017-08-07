@@ -11,6 +11,7 @@
 #define TT_SYMBOL 0x30
 #define TT_FUNC_END 0x31
 #define TT_SEPARATOR 0x32
+#define TT_ARRAY 0x33
 #define TT_LITERAL 0x40
 #define TT_COMMENT 0x41
 

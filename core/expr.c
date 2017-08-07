@@ -162,6 +162,10 @@ void shuntingYard(token* next) {
         } else if (next->type == TT_FUNC_END) {
             while (convertRpnPop(opstack[sp--]));
             copyToken(curTok, (token*)(void*)(start + opstack[sp--]));
+            if (curTok->body.str.len == 1) {
+                curTok->type = TT_ARRAY;
+                curTok->body.symbol = curTok->body.str.text[0];
+            }
             curTok = nextToken(curTok);
         }
         next = nextToken(next);

@@ -7,6 +7,7 @@
 
 short listLine, listPage;
 
+#if 0
 void printToken(token* t) {
     switch (t->type) {
         case TT_NUMBER:
@@ -43,6 +44,10 @@ void printToken(token* t) {
             outputStr("SYM=");
             outputChar(t->body.symbol);
             break;
+        case TT_ARRAY:
+            outputStr("ARR=");
+            outputChar(t->body.symbol);
+            break;
         case TT_FUNC_END:
             outputStr("FE=%d");
             outputInt(t->body.symbol);
@@ -70,6 +75,10 @@ void printTokens(token* t) {
     }
     outputCr();
 }
+#else
+void printTokens(token* t) {
+}
+#endif
 
 void printProgram(void) {
     prgline* p = findLine(listLine);
@@ -138,6 +147,9 @@ void showInfo(void) {
     outputStr("code size: ");
     outputInt(prgSize);
     outputCr();
+    outputStr("vars size: ");
+    outputInt(varSize());
+    outputCr();
     outputStr("next line: ");
     outputInt(nextLineNum);
     outputCr();
@@ -180,7 +192,7 @@ void processLine(char* line) {
         return;
     }
     parseLine(line, t);
-    //printTokens(t);
+    printTokens(t);
     if (getParseErrorPos() != NULL) {
         metaOrError(t, line);
         return;

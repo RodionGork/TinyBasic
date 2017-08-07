@@ -54,6 +54,7 @@ short tokenSize(token* t) {
             return 2 + t->body.str.len;
         case TT_FUNC_END:
         case TT_SYMBOL:
+        case TT_ARRAY:
         case TT_COMMAND:
             return 1 + sizeof(t->body.symbol);
         case TT_NONE:
@@ -285,7 +286,7 @@ char parseSubscripts(void) {
         return 0;
     }
     parseSemicolon();
-    *p = ' ';
+    *p = ')';
     return 1;
 }
 
@@ -300,7 +301,7 @@ char parseAssignment(void) {
     prevTok->body.command = synt;
     curTok = nextToken(prevTok);
     if (synt == CMD_LETA) {
-        curTok->type = TT_SYMBOL;
+        curTok->type = TT_ARRAY;
         curTok->body.symbol = curTok->body.str.text[0];
     }
     prevTok = curTok;
@@ -388,7 +389,7 @@ char parseAllocate() {
         setTokenError(cur, 3);
         return 0;
     }
-    prevTok->type = TT_SYMBOL;
+    prevTok->type = TT_ARRAY;
     prevTok->body.symbol = prevTok->body.str.text[0];
     curTok = nextToken(prevTok);
     if (!parseNumber()) {

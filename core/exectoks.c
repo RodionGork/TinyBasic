@@ -47,6 +47,10 @@ void resetTokenExecutor(void) {
     sp = spInit;
 }
 
+short varSize(void) {
+    return numVars * sizeof(varHolder) + arrayBytes;
+}
+
 void initTokenExecutor(char* space, short size) {
     spInit = (size / sizeof(*calcStack));
     vars = (varHolder*)(void*)space;
@@ -211,6 +215,22 @@ void calcFunction(nstring* name) {
     calcStack[sp] = 0;
 }
 
+void calcArray(char letter) {
+    short offset = getArrayOffset(letter);
+    if (offset == -1) {
+        calcStack[sp] = 0;
+        return;
+    }
+    char b = (offset & 0x8000) ? 1 : sizeof(numeric);
+    offset = (offset & 0x7FFF) + b * calcStack[sp];
+    char* p = ((char*)(void*)vars) + sizeof(varHolder) * numVars + offset;
+    if (b > 1) {
+        calcStack[sp] = *((numeric*)(void*)p);
+    } else {
+        calcStack[sp] = *((unsigned char*)(void*)p);
+    }
+}
+
 numeric calcExpression(void) {
     while (1) {
         switch (curTok->type) {
@@ -229,6 +249,9 @@ numeric calcExpression(void) {
             case TT_FUNCTION:
                 calcFunction(&(curTok->body.str));
                 break;
+            case TT_ARRAY:
+                calcArray(curTok->body.symbol);
+                break;
         }
         advance();
     }
@@ -242,7 +265,7 @@ void execLet(void) {
 
 void execLeta(void) {
     short offset = getArrayOffset(curTok->body.symbol);
-    if (offset < 0) {
+    if (offset == -1) {
         return;
     }
     advance();
@@ -255,9 +278,6 @@ void execLeta(void) {
     } else {
         *((unsigned char*)(void*)p) = (calcExpression() & 0xFF);
     }
-    outputStr("DBG: ");
-    outputInt(curTok->type);
-    outputCr();
 }
 
 void execDim(void) {
