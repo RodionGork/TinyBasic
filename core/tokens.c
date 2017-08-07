@@ -13,6 +13,8 @@ static char* cmds[] = {
     "GOSUB",
     "RETURN",
     "END",
+    "", // LET
+    "", // LETA
     "DIM",
 };
 
@@ -386,6 +388,9 @@ char parseAllocate() {
         setTokenError(cur, 3);
         return 0;
     }
+    prevTok->type = TT_SYMBOL;
+    prevTok->body.symbol = prevTok->body.str.text[0];
+    curTok = nextToken(prevTok);
     if (!parseNumber()) {
         setTokenError(cur, 8);
         return 0;

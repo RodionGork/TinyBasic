@@ -3,13 +3,8 @@
 
 #define MAX_LINE_LEN 80
 
-#include <limits.h>
-
-#if INT_MAX < 100000
-typedef signed short int numeric;
-#else
-typedef signed long int numeric;
-#endif
+//16 bit for arduino, 32 on stm32 and linux
+typedef signed int numeric;
 
 typedef signed char schar;
 

@@ -11,6 +11,7 @@ short nextLineNum = 1;
 short sp, spInit;
 varHolder* vars;
 char numVars;
+short arrayBytes;
 labelCacheElem* labelCache;
 short labelsCached;
 
@@ -24,6 +25,7 @@ void execReturn(void);
 void execEnd(void);
 void execLet(void);
 void execLeta(void);
+void execDim(void);
 
 void (*executors[])(void) = {
     execRem,
@@ -36,10 +38,12 @@ void (*executors[])(void) = {
     execEnd,
     execLet,
     execLeta,
+    execDim,
 };
 
 void resetTokenExecutor(void) {
     numVars = 0;
+    arrayBytes = 0;
     sp = spInit;
 }
 
@@ -56,6 +60,10 @@ short shortVarName(nstring* name) {
         n += name->text[1] * 127;
     }
     return n;
+}
+
+short shortArrayName(char letter) {
+    return 0x7F00 | letter;
 }
 
 char findVar(short name) {
@@ -78,11 +86,17 @@ numeric getVar(short name) {
     return (vars[i].name == name) ? vars[i].value : 0;
 }
 
+short getArrayOffset(char letter) {
+    short name = shortArrayName(letter);
+    char i = findVar(name);
+    return (vars[i].name == name) ? vars[i].value : -1;
+}
+
 void setVar(short name, numeric value) {
     char i = findVar(name);
     if (vars[i].name != name) {
         if (i < numVars) {
-            memmove(vars + i + 1, vars + i, sizeof(varHolder) * (numVars - i));
+            memmove(vars + i + 1, vars + i, sizeof(varHolder) * (numVars - i) + arrayBytes);
         }
         vars[i].name = name;
         numVars += 1;
@@ -227,6 +241,37 @@ void execLet(void) {
 }
 
 void execLeta(void) {
+    short offset = getArrayOffset(curTok->body.symbol);
+    if (offset < 0) {
+        return;
+    }
+    advance();
+    char b = (offset & 0x8000) ? 1 : sizeof(numeric);
+    offset = (offset & 0x7FFF) + b * calcExpression();
+    advance();
+    char* p = ((char*)(void*)vars) + sizeof(varHolder) * numVars + offset;
+    if (b > 1) {
+        *((numeric*)(void*)p) = calcExpression();
+    } else {
+        *((unsigned char*)(void*)p) = (calcExpression() & 0xFF);
+    }
+    outputStr("DBG: ");
+    outputInt(curTok->type);
+    outputCr();
+}
+
+void execDim(void) {
+    short name = shortArrayName(curTok->body.symbol);
+    advance();
+    short len = curTok->body.integer;
+    advance();
+    char itemSize = curTok->type != TT_NONE ? 1 : sizeof(numeric);
+    char pos = findVar(name);
+    if (vars[pos].name == name) {
+        return;
+    }
+    setVar(name, arrayBytes | (itemSize == 1 ? 0x8000 : 0));
+    arrayBytes += len * itemSize;
 }
 
 void execRem(void) {
