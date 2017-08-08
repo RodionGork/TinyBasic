@@ -5,7 +5,7 @@
 #include "tokens.h"
 
 #define PROG_SPACE_SIZE 600
-#define VARS_SPACE_SIZE 150
+#define VARS_SPACE_SIZE 300
 
 char* extraCmds[] = {
     "POKE",

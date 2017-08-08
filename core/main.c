@@ -206,7 +206,10 @@ void processLine(char* line) {
 }
 
 void init(char* space, short dataSize) {
-    outputStr("\nTinyBasic 0.1-PoC\n\n");
+    outputCr();
+    outputStr("Miskatino 1.1");
+    outputCr();
+    outputCr();
     initEditor(space + dataSize);
     initTokenExecutor(space, dataSize);
     listLine = 1;
