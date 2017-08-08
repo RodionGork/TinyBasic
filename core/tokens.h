@@ -40,7 +40,7 @@ void copyToken(token* dst, token* src);
 char tokenClass(token* t);
 char tokenNameEqual(token* t, char* s);
 char* getParseErrorPos(void);
-char* getParseErrorMsg(void);
+void getParseErrorMsg(char*);
 
 #endif
 

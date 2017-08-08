@@ -144,13 +144,13 @@ void prgReset(void) {
 }
 
 void showInfo(void) {
-    outputStr("code size: ");
+    outputStr("code: ");
     outputInt(prgSize);
     outputCr();
-    outputStr("vars size: ");
+    outputStr("vars: ");
     outputInt(varSize());
     outputCr();
-    outputStr("next line: ");
+    outputStr("next: ");
     outputInt(nextLineNum);
     outputCr();
 }
@@ -178,10 +178,11 @@ void metaOrError(token* t, char* line) {
     } else if (tokenNameEqual(t, "HELP")) {
         showHelp();
     } else {
-        outputStr(getParseErrorMsg());
-        outputStr(" (");
+        getParseErrorMsg(line);
+        outputStr(line);
+        outputChar(' ');
         outputInt((long)(getParseErrorPos() - line) + 1);
-        outputStr(")\n");
+        outputCr();
     }
 }
 

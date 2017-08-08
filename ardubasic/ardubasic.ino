@@ -50,7 +50,7 @@ void sysEcho(char c) {
 char sysBreak(char v) {
     short x;
     while (1) {
-        x = uartRead();
+        x = Serial.read();
         if (x < 0) {
             return 0;
         }

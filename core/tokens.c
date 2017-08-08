@@ -19,17 +19,17 @@ static char* cmds[] = {
 };
 
 static char* errorMsgs[] = {
-    "ok",
-    "command or variable expected",
-    "'=' expected",
-    "name expected",
-    "';' expected",
-    "extra characters at line end",
-    "unexpected error",
-    "linenum out of range",
-    "number expected",
-    "unexpected symbol",
-    "unexpected line end",
+    "",
+    "cmd or var X",
+    "'=' X",
+    "name X",
+    "';' X",
+    "extra chars at end",
+    "U error",
+    "number out of range",
+    "number X",
+    "U symbol",
+    "U end",
 };
 
 char* cur;
@@ -476,7 +476,19 @@ char* getParseErrorPos(void) {
     return parseError;
 }
 
-char* getParseErrorMsg(void) {
-    return errorMsgs[parseErrorCode];
+void getParseErrorMsg(char* s) {
+    char i, c = 1;
+    for (i = 0; c != 0; i++) {
+        c = errorMsgs[parseErrorCode][i];
+        if (c == 'X') {
+            memcpy(s, "expected", 8);
+            s += 8;
+        } else if (c == 'U') {
+            memcpy(s, "unexpected", 10);
+            s += 10;
+        } else {
+            *(s++) = c;
+        }
+    }
 }
 
