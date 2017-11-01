@@ -69,8 +69,13 @@ char pinInput(int base, char num) {
 
 void uartEnable(int divisor) {
     REG_L(RCC_BASE, RCC_APB2ENR) |= (1 << 0); // AFIO clock
+    #if UART_REMAP
+    pinMode(GPIOB_BASE, 6, PIN_MODE_OUT, PIN_CNF_O_APP);
+    REG_L(AFIO_BASE, AFIO_MAPR) |= (1 << 2); // UART1 remap
+    #else
     pinMode(GPIOA_BASE, 9, PIN_MODE_OUT, PIN_CNF_O_APP);
-    REG_L(AFIO_BASE, AFIO_MAPR) &= ~(1 << 2); // no UART1 remap
+    REG_L(AFIO_BASE, AFIO_MAPR) &= ~(1 << 2); // UART1 no remap
+    #endif
     REG_L(RCC_BASE, RCC_APB2ENR) |= (1 << 14); // UART clock
     if (REG_L(RCC_BASE, RCC_CFGR) & (4 << 11)) {
         divisor /= 2;

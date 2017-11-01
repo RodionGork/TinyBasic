@@ -54,7 +54,7 @@ void resetIrqHandler(void) {
 
 int main(void) {
     setupPll(CLOCK_SPEED);
-    REG_L(RCC_BASE, RCC_APB2ENR) |= (1 << 2); // port A
+    REG_L(RCC_BASE, RCC_APB2ENR) |= (1 << 2) | (1 << 3); // ports A, B
     
     REG_L(FLASH_BASE, FLASH_KEYR) = 0x45670123;
     REG_L(FLASH_BASE, FLASH_KEYR) = 0xCDEF89AB;
