@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <termios.h>
+#include <unistd.h>
+#include <poll.h>
 
 #include "../core/main.h"
 #include "../core/utils.h"
@@ -25,15 +28,42 @@ FILE* fCurrent;
 short idCurrent = 0;
 volatile char interrupted;
 
+struct termios oldTermSettings;
+
+void sigintHandler(int v) {
+    interrupted = 1;
+}
+
+void initSystem(void) {
+    signal(SIGINT, sigintHandler);
+    struct termios termSettings;
+    tcgetattr(STDIN_FILENO, &oldTermSettings);
+    termSettings = oldTermSettings;
+    termSettings.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &termSettings);
+    setvbuf(stdout, NULL, _IONBF, 0);
+}
+
+void cleanup(void) {
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldTermSettings);
+}
+
 short sysGetc(void) {
-    return getc(stdin);
+    struct pollfd fd;
+    fd.fd = STDIN_FILENO;
+    fd.events = POLLIN;
+    if (!poll(&fd, 1, 0)) {
+        return -1;
+    }
+    return getchar();
 }
 
 void sysPutc(char c) {
-    putc(c, stdout);
+    putchar(c);
 }
 
 void sysEcho(char c) {
+    sysPutc(c);
 }
 
 char sysBreak(char v) {
@@ -45,6 +75,7 @@ char sysBreak(char v) {
 }
 
 void sysQuit(void) {
+    cleanup();
     exit(0);
 }
 
@@ -98,14 +129,6 @@ char storageOperation(void* data, short size) {
         fread(data, -size, 1, fCurrent);
     }
     return 1;
-}
-
-void sigintHandler(int v) {
-    interrupted = 1;
-}
-
-void initSystem(void) {
-    signal(SIGINT, sigintHandler);
 }
 
 int main(void) {
