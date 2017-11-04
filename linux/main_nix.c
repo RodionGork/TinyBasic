@@ -10,10 +10,11 @@
 
 char* extraCmds[] = {
     "POKE",
+    "DELAY",
     "",
 };
 
-char extraCmdArgCnt[] = {2};
+char extraCmdArgCnt[] = {2, 1};
 
 char* extraFuncs[] = {
     "PEEK",
@@ -30,16 +31,11 @@ volatile char interrupted;
 
 struct termios oldTermSettings;
 
-void sigintHandler(int v) {
-    interrupted = 1;
-}
-
 void initSystem(void) {
-    signal(SIGINT, sigintHandler);
     struct termios termSettings;
     tcgetattr(STDIN_FILENO, &oldTermSettings);
     termSettings = oldTermSettings;
-    termSettings.c_lflag &= ~(ICANON | ECHO);
+    termSettings.c_lflag &= ~(ICANON | ECHO | ISIG);
     tcsetattr(STDIN_FILENO, TCSANOW, &termSettings);
     setvbuf(stdout, NULL, _IONBF, 0);
 }
@@ -87,10 +83,17 @@ uchar sysPeek(unsigned long addr) {
     return dataSpace[addr];
 }
 
+void sysDelay(numeric pause) {
+    usleep(pause * 1000L);
+}
+
 void extraCommand(char cmd, numeric args[]) {
     switch (cmd) {
         case 0:
             sysPoke(args[0], args[1]);
+            break;
+        case 1:
+            sysDelay(args[0]);
             break;
     }
 }

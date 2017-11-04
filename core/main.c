@@ -111,30 +111,16 @@ void listProgram(token* t) {
 
 void executeSteps(char* lineBody, token* tokensBody) {
     token* t = nextToken(nextToken(tokensBody));
-    short cnt = 1;
-    if (t->type == TT_NUMBER) {
-        cnt = t->body.integer;
-    }
-    while (cnt-- > 0) {
-        if(executeStep(lineBody, tokensBody)) {
-            break;
-        }
-    }
+    executeNonParsed(lineBody, tokensBody, t->type == TT_NUMBER ? t->body.integer : 1);
 }
 
-void runSteps(char* lineBody, token* tokensBody) {
-    sysBreak(0);
+void executeRun(char* lineBody, token* tokensBody) {
     if (editorSave()) {
         editorLoadParsed(lineBody, tokensBody);
         executeParsedRun();
         editorLoad();
     } else {
-        while (!executeStep(lineBody, tokensBody)) {
-            if (sysBreak(1)) {
-                execBreak();
-                break;
-            }
-        }
+        executeNonParsed(lineBody, tokensBody, -1);
     }
 }
 
@@ -166,7 +152,7 @@ void metaOrError(token* t, char* line) {
     } else if (tokenNameEqual(t, "STEP")) {
         executeSteps(line, t);
     } else if (tokenNameEqual(t, "RUN")) {
-        runSteps(line, t);
+        executeRun(line, t);
     } else if (tokenNameEqual(t, "SAVE")) {
         editorSave();
     } else if (tokenNameEqual(t, "LOAD")) {

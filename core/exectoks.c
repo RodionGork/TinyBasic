@@ -6,6 +6,8 @@
 #include "utils.h"
 #include "extern.h"
 
+#define BREAK_DETECTED() (lastInput == 3)
+
 numeric* calcStack;
 short nextLineNum = 1;
 short sp, spInit;
@@ -14,6 +16,7 @@ char numVars;
 short arrayBytes;
 labelCacheElem* labelCache;
 short labelsCached;
+short lastInput;
 
 void execRem(void);
 void execPrint(void);
@@ -198,6 +201,14 @@ void calcOperation(char op) {
 void calcFunction(nstring* name) {
     short i;
     numeric r;
+    if (cmpNStrToStr(name, "KEY")) {
+        i = calcStack[sp];
+        calcStack[sp] = lastInput;
+        if (i != 0 && !BREAK_DETECTED()) {
+            lastInput = -1;
+        }
+        return;
+    }
     if (cmpNStrToStr(name, "ABS")) {
         if (calcStack[sp] < 0) {
             calcStack[sp] = -calcStack[sp];
@@ -376,7 +387,15 @@ void execExtra(char cmd) {
     extraCommand(cmd, calcStack + (sp - n));
 }
 
+void fetchLastInput(void) {
+    short c = sysGetc();
+    if (lastInput == -1 || c == 3) {
+        lastInput = c;
+    }
+}
+
 char executeTokens(token* t) {
+    fetchLastInput();
     curTok = t;
     while (t->type != TT_NONE) {
         advance();
@@ -408,10 +427,31 @@ char executeStep(char* lineBuf, token* tokenBuf) {
     return 0;
 }
 
+void resetLastInput() {
+    lastInput = -1;
+}
+
 void execBreak() {
     outputStr("BREAK");
     outputCr();
     sp = spInit;
+    resetLastInput();
+}
+
+void executeNonParsed(char* lineBuf, token* tokenBuf, numeric count) {
+    resetLastInput();
+    while (count != 0) {
+        if (executeStep(lineBuf, tokenBuf)) {
+            break;
+        }
+        if (BREAK_DETECTED()) {
+            execBreak();
+            break;
+        }
+        if (count != -1) {
+            count -= 1;
+        }
+    }
 }
 
 void executeParsedRun(void) {
@@ -419,9 +459,10 @@ void executeParsedRun(void) {
     prgline* next;
     labelsCached = 0;
     labelCache = (labelCacheElem*)(void*)(prgStore + prgSize);
+    resetLastInput();
     while (1) {
         if (p->num == 0 || nextLineNum == 0) {
-            return;
+            break;
         }
         next = (prgline*)(void*)((char*)(void*)p + sizeof(p->num) + sizeof(p->str.len) + p->str.len);
         nextLineNum = next->num;
@@ -435,7 +476,7 @@ void executeParsedRun(void) {
         } else {
             p = next;
         }
-        if (sysBreak(1)) {
+        if (BREAK_DETECTED()) {
             execBreak();
             return;
         }

@@ -227,19 +227,6 @@ short sysGetc(void) {
     return uartRead();
 }
 
-char sysBreak(char v) {
-    int x;
-    while (1) {
-        x = uartRead();
-        if (x < 0) {
-            return 0;
-        }
-        if (x == 0x03) {
-            return 1;
-        }
-    }
-}
-
 short adcRead(char channel) {
     return 0;
 }
