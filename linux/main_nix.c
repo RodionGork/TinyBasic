@@ -10,11 +10,10 @@
 
 char* extraCmds[] = {
     "POKE",
-    "DELAY",
     "",
 };
 
-char extraCmdArgCnt[] = {2, 1};
+char extraCmdArgCnt[] = {2};
 
 char* extraFuncs[] = {
     "PEEK",
@@ -91,9 +90,6 @@ void extraCommand(char cmd, numeric args[]) {
     switch (cmd) {
         case 0:
             sysPoke(args[0], args[1]);
-            break;
-        case 1:
-            sysDelay(args[0]);
             break;
     }
 }

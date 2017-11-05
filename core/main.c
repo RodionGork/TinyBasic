@@ -141,9 +141,6 @@ void showInfo(void) {
     outputCr();
 }
 
-void showHelp(void) {
-}
-
 void metaOrError(token* t, char* line) {
     if (tokenNameEqual(t, "QUIT")) {
         sysQuit();
@@ -161,8 +158,6 @@ void metaOrError(token* t, char* line) {
         prgReset();
     } else if (tokenNameEqual(t, "INFO")) {
         showInfo();
-    } else if (tokenNameEqual(t, "HELP")) {
-        showHelp();
     } else {
         getParseErrorMsg(line);
         outputStr(line);
@@ -172,9 +167,7 @@ void metaOrError(token* t, char* line) {
     }
 }
 
-void processLine(char* line) {
-    char toksBody[MAX_LINE_LEN * 2];
-    token* t = (token*)(void*) toksBody;
+void processLine(char* line, token* t) {
     if (line[0] == 0) {
         return;
     }
@@ -202,11 +195,17 @@ void init(char* space, short dataSize) {
     listPage = 3;
 }
 
+void preload(char* line, token* t) {
+}
+
 void dispatch(void) {
     char line[MAX_LINE_LEN];
+    char toksBody[MAX_LINE_LEN * 2];
+    token* t = (token*)(void*) toksBody;
+    preload(line, t);
     while (1) {
         readLine(line);
-        processLine(line);
+        processLine(line, t);
     }
 }
 

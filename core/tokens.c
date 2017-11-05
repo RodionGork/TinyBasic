@@ -16,6 +16,7 @@ static char* cmds[] = {
     "", // LET
     "", // LETA
     "DIM",
+    "DELAY",
 };
 
 static char* errorMsgs[] = {
@@ -440,6 +441,8 @@ char parseStatement(void) {
         return parseConditional();
     } else if (cmd == CMD_DIM) {
         return parseAllocate();
+    } else if (cmd == CMD_DELAY) {
+        return parseNExpressions(1);
     } else if (cmd >= CMD_EXTRA) {
         return parseNExpressions(extraCmdArgCnt[cmd - CMD_EXTRA]);
     }

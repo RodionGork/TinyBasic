@@ -29,6 +29,7 @@ void execEnd(void);
 void execLet(void);
 void execLeta(void);
 void execDim(void);
+void execDelay(void);
 
 void (*executors[])(void) = {
     execRem,
@@ -42,6 +43,7 @@ void (*executors[])(void) = {
     execLet,
     execLeta,
     execDim,
+    execDelay,
 };
 
 void resetTokenExecutor(void) {
@@ -303,6 +305,10 @@ void execDim(void) {
     }
     setVar(name, arrayBytes | (itemSize == 1 ? 0x8000 : 0));
     arrayBytes += len * itemSize;
+}
+
+void execDelay(void) {
+    sysDelay(calcExpression());
 }
 
 void execRem(void) {

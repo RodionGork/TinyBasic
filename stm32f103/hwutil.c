@@ -22,11 +22,10 @@ char* extraCmds[] = {
     "POKE2",
     "POKE4",
     "PIN",
-    "DELAY",
     "",
 };
 
-char extraCmdArgCnt[] = {2, 2, 2, 2, 1};
+char extraCmdArgCnt[] = {2, 2, 2, 2};
 
 char* extraFuncs[] = {
     "PEEK",
@@ -247,9 +246,9 @@ void pinOut(char pin, schar state) {
     }
 }
 
-void sysDelay(short ms) {
+void sysDelay(numeric pause) {
     int i;
-    for (i = 2835 * ms; i > 0; i--) {
+    for (i = 2835 * pause; i > 0; i--) {
         __asm("nop");
     }
 }
@@ -270,9 +269,6 @@ void extraCommand(char cmd, numeric args[]) {
             break;
         case 3:
             pinOut(args[0], args[1]);
-            break;
-        case 4:
-            sysDelay(args[0]);
             break;
     }
 }

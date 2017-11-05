@@ -10,11 +10,10 @@
 char* extraCmds[] = {
     "POKE",
     "PIN",
-    "DELAY",
     "",
 };
 
-char extraCmdArgCnt[] = {2, 2, 1};
+char extraCmdArgCnt[] = {2, 2};
 
 char* extraFuncs[] = {
     "PEEK",
@@ -75,6 +74,10 @@ uchar peek(short addr) {
 void sysQuit(void) {
 }
 
+void sysDelay(numeric pause) {
+    delay(pause);
+}
+
 void extraCommand(char cmd, numeric args[]) {
     switch (cmd) {
         case 0:
@@ -82,9 +85,6 @@ void extraCommand(char cmd, numeric args[]) {
             break;
         case 1:
             pinOut(args[0], args[1]);
-            break;
-        case 2:
-            delay(args[0]);
             break;
     }
 }
