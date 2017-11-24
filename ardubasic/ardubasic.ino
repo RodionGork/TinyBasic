@@ -4,8 +4,10 @@
 
 #include "tokens.h"
 
-#define PROG_SPACE_SIZE 600
-#define VARS_SPACE_SIZE 300
+#define UART_SPEED 115200
+
+#define PROG_SPACE_SIZE 500
+#define VARS_SPACE_SIZE 150
 
 char* extraCmds[] = {
     "POKE",
@@ -121,7 +123,7 @@ char storageOperation(void* data, short size) {
 }
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(UART_SPEED);
     init(dataSpace, VARS_SPACE_SIZE);
 }
 
