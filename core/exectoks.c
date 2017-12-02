@@ -50,6 +50,7 @@ void resetTokenExecutor(void) {
     numVars = 0;
     arrayBytes = 0;
     sp = spInit;
+    vars[0].name = 0;
 }
 
 short varSize(void) {

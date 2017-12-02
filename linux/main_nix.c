@@ -102,12 +102,13 @@ numeric extraFunction(char cmd, numeric args[]) {
     return 0;
 }
 
-FILE* openStorage(char id, char op) {
+char openStorage(char id, char op) {
     char fname[] = "store0.dat";
     char ops[] = "xb";
     fname[5] += id;
     ops[0] = op;
-    return fopen(fname, ops);
+    fCurrent = fopen(fname, ops);
+    return fCurrent != NULL ? 1 : 0;
 }
 
 char storageOperation(void* data, short size) {
@@ -118,7 +119,10 @@ char storageOperation(void* data, short size) {
         idCurrent = 0;
         if (size != 0) {
             idCurrent = abs(size);
-            fCurrent = openStorage(idCurrent, size > 0 ? 'w' : 'r');
+            if (!openStorage(idCurrent, size > 0 ? 'w' : 'r')) {
+                idCurrent = 0;
+                return 0;
+            }
         }
         return 1;
     }

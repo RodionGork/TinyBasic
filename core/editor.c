@@ -69,17 +69,22 @@ char editorSave(void) {
     return 1;
 }
 
-void editorLoad(void) {
-    storageOperation(NULL, -1);
+char editorLoad(void) {
+    if (!storageOperation(NULL, -1)) {
+        return 0;
+    }
     storageOperation(&prgSize, (short) -sizeof(prgSize));
     storageOperation(prgStore, -prgSize);
     storageOperation(NULL, 0);
+    return 1;
 }
 
-void editorLoadParsed(char* lineBuf, token* tokenBuf) {
+char editorLoadParsed(char* lineBuf, token* tokenBuf) {
     void* p = prgStore;
     unsigned char len;
-    storageOperation(NULL, -1);
+    if (!storageOperation(NULL, -1)) {
+        return 0;
+    }
     storageOperation(lineBuf, -2);
     while (1) {
         storageOperation(p, (short) -sizeof(short));
@@ -99,5 +104,6 @@ void editorLoadParsed(char* lineBuf, token* tokenBuf) {
     }
     storageOperation(NULL, 0);
     prgSize = ((char*)p - (char*)(void*)prgStore) + sizeof(short);
+    return 1;
 }
 

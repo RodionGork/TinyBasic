@@ -196,6 +196,13 @@ void init(char* space, short dataSize) {
 }
 
 void preload(char* line, token* t) {
+    if (editorLoadParsed(line, t)) {
+        sysDelay(1000);
+        if (sysGetc() < 0) {
+            executeParsedRun();
+        }
+    }
+    prgReset();
 }
 
 void dispatch(void) {
