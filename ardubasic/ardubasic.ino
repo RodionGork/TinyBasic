@@ -53,7 +53,7 @@ short adcRead(char channel) {
         analogRead(0);
         ADMUX = (ADMUX & 0xF0) | 0x0E;
         delay(1);
-        ADCSRA &= 0x40;
+        ADCSRA |= 0x40;
         while (ADCSRA & 0x40);
         short v = ADC;
         return v > 0 ? (1100L * 1023) / v : -1;
