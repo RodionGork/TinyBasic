@@ -103,11 +103,32 @@ numeric extraFunction(char cmd, numeric args[]) {
     return 0;
 }
 
+unsigned char storageChecksum(short size) {
+    unsigned char res = 0;
+    while (size > 0) {
+        res ^= EEPROM.read(--size);
+    }
+    return res;
+}
+
 char storageOperation(void* data, short size) {
     short i;
     if (data == NULL) {
-        filePtr = 0;
-        return 1;
+        if (size == 0) {
+            EEPROM.write(filePtr, storageChecksum(filePtr));
+            return 1;
+        } else {
+            filePtr = 0;
+            if (size > 0) {
+                return 1;
+            }
+            size = EEPROM.read(1);
+            size = ((size << 8) | EEPROM.read(0)) + 2;
+            if (size <= 0 || size >= PROG_SPACE_SIZE) {
+                return 0;
+            }
+            return storageChecksum(size + 1) == 0;
+        }
     }
     if (size > 0) {
         for (i = 0; i < size; i += 1) {
