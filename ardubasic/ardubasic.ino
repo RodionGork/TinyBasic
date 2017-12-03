@@ -49,6 +49,15 @@ void sysEcho(char c) {
 }
 
 short adcRead(char channel) {
+    if (channel == -1) {
+        analogRead(0);
+        ADMUX = (ADMUX & 0xF0) | 0x0E;
+        delay(1);
+        ADCSRA &= 0x40;
+        while (ADCSRA & 0x40);
+        short v = ADC;
+        return v > 0 ? (1100L * 1023) / v : -1;
+    }
     return analogRead(channel);
 }
 
