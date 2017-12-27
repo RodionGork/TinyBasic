@@ -7,6 +7,7 @@
 
 #include "../core/main.h"
 #include "../core/utils.h"
+#include "../core/textual.h"
 
 numeric extraCmds[] = {
     0x036F, // POKE
@@ -21,6 +22,9 @@ numeric extraFuncs[] = {
 };
 
 char extraFuncArgCnt[] = {1};
+
+static char* commonStrings = CONST_COMMON_STRINGS;
+static char * parsingErrors = CONST_PARSING_ERRORS;
 
 char dataSpace[4096];
 
