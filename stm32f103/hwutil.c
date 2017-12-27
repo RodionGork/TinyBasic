@@ -17,22 +17,22 @@ char uartRxBufStart, uartRxBufEnd;
 uchar writeOddChar;
 unsigned short storagePos;
 
-char* extraCmds[] = {
-    "POKE",
-    "POKE2",
-    "POKE4",
-    "PIN",
-    "",
+numeric extraCmds[] = {
+    0x036F, // POKE
+    0x06EC, // POKE2
+    0x06EA, // POKE4
+    0x019C, // PIN
+    0
 };
 
 char extraCmdArgCnt[] = {2, 2, 2, 2};
 
-char* extraFuncs[] = {
-    "PEEK",
-    "PEEK2",
-    "PEEK4",
-    "PIN",
-    "",
+numeric extraFuncs[] = {
+    0x0355, // PEEK
+    0x698, // PEEK2
+    0x69E, // PEEK4
+    0x019C, // PIN
+    0
 };
 
 char extraFuncArgCnt[] = {1, 1, 1, 1};

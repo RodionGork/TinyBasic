@@ -142,21 +142,22 @@ void showInfo(void) {
 }
 
 void metaOrError(token* t, char* line) {
-    if (tokenNameEqual(t, "QUIT")) {
+    numeric h = tokenHash(t);
+    if (h == 0x31A) { // QUIT
         sysQuit();
-    } else if (tokenNameEqual(t, "LIST")) {
+    } else if (h == 0x3B6) { // LIST
         listProgram(t);
-    } else if (tokenNameEqual(t, "STEP")) {
+    } else if (h == 0x312) { // STEP
         executeSteps(line, t);
-    } else if (tokenNameEqual(t, "RUN")) {
+    } else if (h == 0x1AC) { // RUN
         executeRun(line, t);
-    } else if (tokenNameEqual(t, "SAVE")) {
+    } else if (h == 0x375) { // SAVE
         editorSave();
-    } else if (tokenNameEqual(t, "LOAD")) {
+    } else if (h == 0x39A) { // LOAD
         editorLoad();
-    } else if (tokenNameEqual(t, "RESET")) {
+    } else if (h == 0x69A) { // RESET
         prgReset();
-    } else if (tokenNameEqual(t, "INFO")) {
+    } else if (h == 0x3B3) { // INFO
         showInfo();
     } else {
         getParseErrorMsg(line);

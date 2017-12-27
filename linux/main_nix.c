@@ -8,16 +8,16 @@
 #include "../core/main.h"
 #include "../core/utils.h"
 
-char* extraCmds[] = {
-    "POKE",
-    "",
+numeric extraCmds[] = {
+    0x036F, // POKE
+    0
 };
 
 char extraCmdArgCnt[] = {2};
 
-char* extraFuncs[] = {
-    "PEEK",
-    "",
+numeric extraFuncs[] = {
+    0x0355, // PEEK
+    0
 };
 
 char extraFuncArgCnt[] = {1};

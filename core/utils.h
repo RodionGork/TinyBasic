@@ -16,6 +16,7 @@ char isAlNum(char c);
 char isSpace(char c);
 char toUpper(char c);
 char makeDigit(char c, char base);
+numeric hashOfNStr(nstring* t);
 
 char input(char* s, short n);
 void outputChar(char c);

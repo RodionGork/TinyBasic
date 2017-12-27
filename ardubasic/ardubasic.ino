@@ -7,21 +7,21 @@
 #define UART_SPEED 115200
 
 #define PROG_SPACE_SIZE 500
-#define VARS_SPACE_SIZE 150
+#define VARS_SPACE_SIZE 250
 
-char* extraCmds[] = {
-    "POKE",
-    "PIN",
-    "",
+numeric extraCmds[] = {
+    0x036F, // POKE
+    0x019C, // PIN
+    0
 };
 
 char extraCmdArgCnt[] = {2, 2};
 
-char* extraFuncs[] = {
-    "PEEK",
-    "PIN",
-    "ADC",
-    "",
+numeric extraFuncs[] = {
+    0x0355, // PEEK
+    0x019C, // PIN
+    0x01CF, // ADC
+    0
 };
 
 char dataSpace[VARS_SPACE_SIZE + PROG_SPACE_SIZE];

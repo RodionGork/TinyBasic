@@ -193,3 +193,13 @@ char isSpace(char c) {
     return 0;
 }
 
+numeric hashOfNStr(nstring* t) {
+    char i = 0, n = t->len;
+    numeric res = 0;
+    while (i < n) {
+        res = (res << 1) ^ t->text[i];
+        i++;
+    }
+    return res;
+}
+

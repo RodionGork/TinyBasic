@@ -204,7 +204,8 @@ void calcOperation(char op) {
 void calcFunction(nstring* name) {
     short i;
     numeric r;
-    if (cmpNStrToStr(name, "KEY")) {
+    numeric h = hashOfNStr(name);
+    if (h == 0x1FF) { // KEY
         i = calcStack[sp];
         calcStack[sp] = lastInput;
         if (i != 0 && !BREAK_DETECTED()) {
@@ -212,14 +213,14 @@ void calcFunction(nstring* name) {
         }
         return;
     }
-    if (cmpNStrToStr(name, "ABS")) {
+    if (h == 0x1D3) { // ABS
         if (calcStack[sp] < 0) {
             calcStack[sp] = -calcStack[sp];
         }
         return;
     }
-    for (i = 0; extraFuncs[i][0]; i++) {
-        if (cmpNStrToStr(name, extraFuncs[i])) {
+    for (i = 0; extraFuncs[i]; i++) {
+        if (h == extraFuncs[i]) {
             r = extraFunction(i, calcStack + sp);
             sp += extraFuncArgCnt[i] - 1;
             calcStack[sp] = r;

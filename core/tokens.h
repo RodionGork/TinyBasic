@@ -39,7 +39,7 @@ short tokenChainSize(token* t);
 token* nextToken(token* t);
 void copyToken(token* dst, token* src);
 char tokenClass(token* t);
-char tokenNameEqual(token* t, char* s);
+numeric tokenHash(token* t);
 char* getParseErrorPos(void);
 void getParseErrorMsg(char*);
 

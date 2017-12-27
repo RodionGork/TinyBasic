@@ -1,9 +1,9 @@
 #ifndef __EXTERN_H_
 #define __EXTERN_H_
 
-extern char* extraCmds[];
+extern numeric extraCmds[];
 extern char extraCmdArgCnt[];
-extern char* extraFuncs[];
+extern numeric extraFuncs[];
 extern char extraFuncArgCnt[];
 
 short sysGetc(void);

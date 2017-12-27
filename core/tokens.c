@@ -4,19 +4,19 @@
 #include "utils.h"
 #include "extern.h"
 
-static char* cmds[] = {
-    "REM",
-    "PRINT",
-    "INPUT",
-    "IF",
-    "GOTO",
-    "GOSUB",
-    "RETURN",
-    "END",
-    "", // LET
-    "", // LETA
-    "DIM",
-    "DELAY",
+static numeric cmds[] = {
+    0x018F, // REM
+    0x067C, // PRINT
+    0x075E, // INPUT
+    0x00D4, // IF
+    0x03E3, // GOTO
+    0x07AC, // GOSUB
+    0x0D0E, // RETURN
+    0x01CC, // END
+    0x7FFF, // LET
+    0x7FFF, // LETA
+    0x01CF, // DIM
+    0x0783, // DELAY
 };
 
 static char* errorMsgs[] = {
@@ -106,14 +106,15 @@ static void substCommandFound(char code) {
 
 void trySubstCmd(void) {
     short i = 0;
+    numeric cmdHash = tokenHash(curTok);
     for (i = 0; i < (short) (sizeof(cmds) / sizeof(*cmds)); i++) {
-        if (tokenNameEqual(curTok, cmds[i])) {
+        if (cmdHash == cmds[i]) {
             substCommandFound(i);
             return;
         }
     }
-    for (i = 0; extraCmds[i][0]; i++) {
-        if (tokenNameEqual(curTok, extraCmds[i])) {
+    for (i = 0; extraCmds[i]; i++) {
+        if (cmdHash == extraCmds[i]) {
             substCommandFound(CMD_EXTRA + i);
             return;
         }
@@ -468,11 +469,11 @@ char tokenClass(token* t) {
     return t->type & 0xF0;
 }
 
-char tokenNameEqual(token* t, char* s) {
+numeric tokenHash(token* t) {
     if (tokenClass(t) != TT_NAME) {
         return 0;
     }
-    return cmpNStrToStr(&(t->body.str), s);
+    return hashOfNStr(&(t->body.str));
 }
 
 char* getParseErrorPos(void) {
