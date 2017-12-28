@@ -4,6 +4,7 @@
 #include "exectoks.h"
 #include "utils.h"
 #include "extern.h"
+#include "textual.h"
 
 short listLine, listPage;
 
@@ -130,13 +131,13 @@ void prgReset(void) {
 }
 
 void showInfo(void) {
-    outputStr("code: ");
+    outputConstStr(ID_COMMON_STRINGS, 1, NULL); // code:
     outputInt(prgSize);
     outputCr();
-    outputStr("vars: ");
+    outputConstStr(ID_COMMON_STRINGS, 2, NULL); // vars:
     outputInt(varSize());
     outputCr();
-    outputStr("next: ");
+    outputConstStr(ID_COMMON_STRINGS, 3, NULL); // next:
     outputInt(nextLineNum);
     outputCr();
 }
@@ -187,7 +188,7 @@ void processLine(char* line, token* t) {
 
 void init(char* space, short dataSize) {
     outputCr();
-    outputStr("Miskatino 1.1");
+    outputConstStr(ID_COMMON_STRINGS, 0, NULL); // Miskatino vX.X
     outputCr();
     outputCr();
     initEditor(space + dataSize);

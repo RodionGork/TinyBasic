@@ -2,6 +2,7 @@
 #include "stdlib.h"
 
 #include "../core/utils.h"
+#include "../core/textual.h"
 
 #define UART_RX_BUF_SIZE 8
 
@@ -36,6 +37,9 @@ numeric extraFuncs[] = {
 };
 
 char extraFuncArgCnt[] = {1, 1, 1, 1};
+
+static char* commonStrings = CONST_COMMON_STRINGS;
+static char * parsingErrors = CONST_PARSING_ERRORS;
 
 void enableInterrupts(void) {
     __asm("cpsie i");
@@ -254,6 +258,35 @@ void sysDelay(numeric pause) {
 }
 
 void sysQuit(void) {
+}
+
+void outputConstStr(char strId, char index, char* w) {
+    char* s;
+    switch (strId) {
+        case ID_COMMON_STRINGS:
+            s = commonStrings;
+            break;
+        case ID_PARSING_ERRORS:
+            s = parsingErrors;
+            break;
+        default:
+            return;
+    }
+    while (index > 0) {
+        while (*s++ != '\n') {
+        }
+        index -= 1;
+    }
+    while (*s != '\n') {
+        if (w) {
+            *(w++) = (*s++);
+        } else {
+            sysPutc(*s++);
+        }
+    }
+    if (w) {
+        *w = 0;
+    }
 }
 
 void extraCommand(char cmd, numeric args[]) {

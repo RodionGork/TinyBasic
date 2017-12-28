@@ -90,6 +90,35 @@ void sysDelay(numeric pause) {
     usleep(pause * 1000L);
 }
 
+void outputConstStr(char strId, char index, char* w) {
+    char* s;
+    switch (strId) {
+        case ID_COMMON_STRINGS:
+            s = commonStrings;
+            break;
+        case ID_PARSING_ERRORS:
+            s = parsingErrors;
+            break;
+        default:
+            return;
+    }
+    while (index > 0) {
+        while (*s++ != '\n') {
+        }
+        index -= 1;
+    }
+    while (*s != '\n') {
+        if (w) {
+            *(w++) = (*s++);
+        } else {
+            sysPutc(*s++);
+        }
+    }
+    if (w) {
+        *w = 0;
+    }
+}
+
 void extraCommand(char cmd, numeric args[]) {
     switch (cmd) {
         case 0:

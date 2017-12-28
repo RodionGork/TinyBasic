@@ -3,6 +3,7 @@
 #include "expr.h"
 #include "utils.h"
 #include "extern.h"
+#include "textual.h"
 
 static numeric cmds[] = {
     0x018F, // REM
@@ -19,6 +20,7 @@ static numeric cmds[] = {
     0x0783, // DELAY
 };
 
+/*
 static char* errorMsgs[] = {
     "",
     "cmd or var X",
@@ -32,6 +34,7 @@ static char* errorMsgs[] = {
     "U symbol",
     "U end",
 };
+*/
 
 char* cur;
 token* curTok;
@@ -481,18 +484,6 @@ char* getParseErrorPos(void) {
 }
 
 void getParseErrorMsg(char* s) {
-    char i, c = 1;
-    for (i = 0; c != 0; i++) {
-        c = errorMsgs[parseErrorCode][i];
-        if (c == 'X') {
-            memcpy(s, "expected", 8);
-            s += 8;
-        } else if (c == 'U') {
-            memcpy(s, "unexpected", 10);
-            s += 10;
-        } else {
-            *(s++) = c;
-        }
-    }
+    outputConstStr(ID_PARSING_ERRORS, parseErrorCode, s);
 }
 

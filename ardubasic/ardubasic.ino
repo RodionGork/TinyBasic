@@ -1,13 +1,14 @@
-#include "EEPROM.h"
+#include <EEPROM.h>
+#include <avr/pgmspace.h>
 
 #include "main.h"
-
-#include "tokens.h"
+#include "mytypes.h"
+#include "textual.h"
 
 #define UART_SPEED 115200
 
-#define PROG_SPACE_SIZE 500
-#define VARS_SPACE_SIZE 250
+#define PROG_SPACE_SIZE 650
+#define VARS_SPACE_SIZE 300
 
 numeric extraCmds[] = {
     0x036F, // POKE
@@ -24,9 +25,12 @@ numeric extraFuncs[] = {
     0
 };
 
-char dataSpace[VARS_SPACE_SIZE + PROG_SPACE_SIZE];
-
 char extraFuncArgCnt[] = {1, 1, 1};
+
+static const char commonStrings[] PROGMEM = CONST_COMMON_STRINGS;
+static const char parsingErrors[] PROGMEM = CONST_PARSING_ERRORS;
+
+char dataSpace[VARS_SPACE_SIZE + PROG_SPACE_SIZE];
 
 short filePtr;
 
@@ -87,6 +91,44 @@ void sysQuit(void) {
 
 void sysDelay(numeric pause) {
     delay(pause);
+}
+
+void outputConstStr(char strId, char index, char* w) {
+    const char* s;
+    int k = 0;
+    char c;
+    switch (strId) {
+        case ID_COMMON_STRINGS:
+            s = commonStrings;
+            break;
+        case ID_PARSING_ERRORS:
+            s = parsingErrors;
+            break;
+        default:
+            return;
+    }
+    while (index > 0) {
+        do {
+            c = pgm_read_byte_near(s + k);
+            k += 1;
+        } while (c != '\n');
+        index -= 1;
+    }
+    while (1) {
+        c = pgm_read_byte_near(s + k);
+        if (c == '\n') {
+            break;
+        }
+        if (w != NULL) {
+            *(w++) = c;
+        } else {
+            sysPutc(c);
+        }
+        k += 1;
+    }
+    if (w != NULL) {
+        *w = 0;
+    }
 }
 
 void extraCommand(char cmd, numeric args[]) {
