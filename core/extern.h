@@ -1,10 +1,11 @@
 #ifndef __EXTERN_H_
 #define __EXTERN_H_
 
-extern numeric extraCmds[];
 extern char extraCmdArgCnt[];
-extern numeric extraFuncs[];
 extern char extraFuncArgCnt[];
+
+short extraCommandByHash(numeric h);
+short extraFunctionByHash(numeric h);
 
 short sysGetc(void);
 void sysPutc(char c);

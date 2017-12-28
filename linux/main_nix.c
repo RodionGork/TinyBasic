@@ -8,18 +8,9 @@
 #include "../core/main.h"
 #include "../core/utils.h"
 #include "../core/textual.h"
-
-numeric extraCmds[] = {
-    0x036F, // POKE
-    0
-};
+#include "../core/tokens.h"
 
 char extraCmdArgCnt[] = {2};
-
-numeric extraFuncs[] = {
-    0x0355, // PEEK
-    0
-};
 
 char extraFuncArgCnt[] = {1};
 
@@ -116,6 +107,24 @@ void outputConstStr(char strId, char index, char* w) {
     }
     if (w) {
         *w = 0;
+    }
+}
+
+short extraCommandByHash(numeric h) {
+    switch (h) {
+        case 0x036F: // POKE
+            return CMD_EXTRA + 0;
+        default:
+            return -1;
+    }
+}
+
+short extraFunctionByHash(numeric h) {
+    switch (h) {
+        case 0x0355: // PEEK
+            return 0;
+        default:
+            return -1;
     }
 }
 

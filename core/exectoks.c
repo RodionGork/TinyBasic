@@ -220,13 +220,12 @@ void calcFunction(nstring* name) {
         }
         return;
     }
-    for (i = 0; extraFuncs[i]; i++) {
-        if (h == extraFuncs[i]) {
-            r = extraFunction(i, calcStack + sp);
-            sp += extraFuncArgCnt[i] - 1;
-            calcStack[sp] = r;
-            return;
-        }
+    i = extraFunctionByHash(h);
+    if (i >= 0) {
+        r = extraFunction(i, calcStack + sp);
+        sp += extraFuncArgCnt[i] - 1;
+        calcStack[sp] = r;
+        return;
     }
     calcStack[sp] = 0;
 }
@@ -348,7 +347,8 @@ void execInput(void) {
             case TT_SEPARATOR:
                 break;
             case TT_VARIABLE:
-                outputStr("? ");
+                outputChar('?');
+                outputChar(' ');
                 input(s, sizeof(s));
                 setVar(shortVarName(&(curTok->body.str)), decFromStr(s));
                 break;

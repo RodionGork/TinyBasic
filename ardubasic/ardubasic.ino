@@ -4,26 +4,14 @@
 #include "main.h"
 #include "mytypes.h"
 #include "textual.h"
+#include "tokens.h"
 
 #define UART_SPEED 115200
 
-#define PROG_SPACE_SIZE 650
+#define PROG_SPACE_SIZE 700
 #define VARS_SPACE_SIZE 300
 
-numeric extraCmds[] = {
-    0x036F, // POKE
-    0x019C, // PIN
-    0
-};
-
 char extraCmdArgCnt[] = {2, 2};
-
-numeric extraFuncs[] = {
-    0x0355, // PEEK
-    0x019C, // PIN
-    0x01CF, // ADC
-    0
-};
 
 char extraFuncArgCnt[] = {1, 1, 1};
 
@@ -128,6 +116,30 @@ void outputConstStr(char strId, char index, char* w) {
     }
     if (w != NULL) {
         *w = 0;
+    }
+}
+
+short extraCommandByHash(numeric h) {
+    switch (h) {
+        case 0x036F: // POKE
+            return CMD_EXTRA + 0;
+        case 0x019C: // PIN
+            return CMD_EXTRA + 1;
+        default:
+            return -1;
+    }
+}
+
+short extraFunctionByHash(numeric h) {
+    switch (h) {
+        case 0x0355: // PEEK
+            return 0;
+        case 0x019C: // PIN
+            return 1;
+        case 0x01CF: // ADC
+            return 2;
+        default:
+            return -1;
     }
 }
 

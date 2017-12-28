@@ -3,6 +3,7 @@
 
 #include "../core/utils.h"
 #include "../core/textual.h"
+#include "../core/tokens.h"
 
 #define UART_RX_BUF_SIZE 8
 
@@ -18,23 +19,7 @@ char uartRxBufStart, uartRxBufEnd;
 uchar writeOddChar;
 unsigned short storagePos;
 
-numeric extraCmds[] = {
-    0x036F, // POKE
-    0x06EC, // POKE2
-    0x06EA, // POKE4
-    0x019C, // PIN
-    0
-};
-
 char extraCmdArgCnt[] = {2, 2, 2, 2};
-
-numeric extraFuncs[] = {
-    0x0355, // PEEK
-    0x698, // PEEK2
-    0x69E, // PEEK4
-    0x019C, // PIN
-    0
-};
 
 char extraFuncArgCnt[] = {1, 1, 1, 1};
 
@@ -286,6 +271,36 @@ void outputConstStr(char strId, char index, char* w) {
     }
     if (w) {
         *w = 0;
+    }
+}
+
+short extraCommandByHash(numeric h) {
+    switch (h) {
+        case 0x036F: // POKE
+            return CMD_EXTRA + 0;
+        case 0x06EC: // POKE2
+            return CMD_EXTRA + 1;
+        case 0x06EA: // POKE4
+            return CMD_EXTRA + 2;
+        case 0x019C: // PIN
+            return CMD_EXTRA + 3;
+        default:
+            return -1;
+    }
+}
+
+short extraFunctionByHash(numeric h) {
+    switch (h) {
+        case 0x0355: // PEEK
+            return 0;
+        case 0x0698: // PEEK2
+            return 1;
+        case 0x069E: // PEEK4
+            return 2;
+        case 0x019C: // PIN
+            return 3;
+        default:
+            return -1;
     }
 }
 

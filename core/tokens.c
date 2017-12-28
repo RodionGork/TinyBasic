@@ -5,42 +5,39 @@
 #include "extern.h"
 #include "textual.h"
 
-static numeric cmds[] = {
-    0x018F, // REM
-    0x067C, // PRINT
-    0x075E, // INPUT
-    0x00D4, // IF
-    0x03E3, // GOTO
-    0x07AC, // GOSUB
-    0x0D0E, // RETURN
-    0x01CC, // END
-    0x7FFF, // LET
-    0x7FFF, // LETA
-    0x01CF, // DIM
-    0x0783, // DELAY
-};
-
-/*
-static char* errorMsgs[] = {
-    "",
-    "cmd or var X",
-    "'=' X",
-    "name X",
-    "';' X",
-    "extra chars at end",
-    "U error",
-    "number out of range",
-    "number X",
-    "U symbol",
-    "U end",
-};
-*/
-
 char* cur;
 token* curTok;
 token* prevTok;
 char* parseError;
 char parseErrorCode;
+
+static short cmdCodeByHash(numeric h) {
+    // replaced array with switch to save RAM
+    switch (h) {
+        case 0x018F: // REM
+            return CMD_REM;
+        case 0x067C: // PRINT
+            return CMD_PRINT;
+        case 0x075E: // INPUT
+            return CMD_INPUT;
+        case 0x00D4: // IF
+            return CMD_IF;
+        case 0x03E3: // GOTO
+            return CMD_GOTO;
+        case 0x07AC: // GOSUB
+            return CMD_GOSUB;
+        case 0x0D0E: // RETURN
+            return CMD_RETURN;
+        case 0x01CC: // END
+            return CMD_END;
+        case 0x01CF: // DIM
+            return CMD_DIM;
+        case 0x0783: // DELAY
+            return CMD_DELAY;
+        default:
+            return extraCommandByHash(h);
+    }
+}
 
 char* getCurTokPos() {
     return cur;
@@ -108,19 +105,12 @@ static void substCommandFound(char code) {
 }
 
 void trySubstCmd(void) {
-    short i = 0;
+    short i;
     numeric cmdHash = tokenHash(curTok);
-    for (i = 0; i < (short) (sizeof(cmds) / sizeof(*cmds)); i++) {
-        if (cmdHash == cmds[i]) {
-            substCommandFound(i);
-            return;
-        }
-    }
-    for (i = 0; extraCmds[i]; i++) {
-        if (cmdHash == extraCmds[i]) {
-            substCommandFound(CMD_EXTRA + i);
-            return;
-        }
+    i = cmdCodeByHash(cmdHash);
+    if (i >= 0) {
+        substCommandFound(i);
+        return;
     }
 }
 
