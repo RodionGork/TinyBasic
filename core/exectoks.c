@@ -5,6 +5,7 @@
 #include "editor.h"
 #include "utils.h"
 #include "extern.h"
+#include "textual.h"
 
 #define BREAK_DETECTED() (lastInput == 3)
 
@@ -418,7 +419,8 @@ char executeTokens(token* t) {
 }
 
 void signalEndOfCode(void) {
-    outputStr("End of code\n");
+    outputConstStr(ID_COMMON_STRINGS, 5, NULL);
+    outputCr();
 }
 
 char executeStep(char* lineBuf, token* tokenBuf) {
@@ -440,7 +442,7 @@ void resetLastInput() {
 }
 
 void execBreak() {
-    outputStr("BREAK");
+    outputConstStr(ID_COMMON_STRINGS, 4, NULL); // BREAK
     outputCr();
     sp = spInit;
     resetLastInput();

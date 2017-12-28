@@ -4,7 +4,8 @@
 #include "expr.h"
 
 char parseExprUnary() {
-    if (!charInStr(*getCurTokPos(), "-!")) {
+    char c = *getCurTokPos();
+    if (c != '-' && c != '!') {
         return 0;
     }
     parseSymbol();
@@ -47,13 +48,14 @@ char parseExprBop(void) {
     if (c == 0 || c == ';') {
         return 's';
     }
-    if (*getCurTokPos() == ')') {
+    if (c == ')') {
         return ')';
     }
-    if (*getCurTokPos() == ',') {
+    if (c == ',') {
         return ',';
     }
-    if (charInStr(*getCurTokPos(), "+-*^/%<>=&|")) {
+    if (c == '+' || c == '-' || c == '*' || c == '^' || c == '/' || c == '%'
+            || c == '<' || c == '>' || c == '=' || c == '&' || c == '|') {
         parseSymbol();
         return '1';
     }
