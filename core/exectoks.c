@@ -225,6 +225,7 @@ void calcFunction(nstring* name) {
     }
     i = extraFunctionByHash(h);
     if (i >= 0) {
+        // arguments will appear in reverse order
         r = extraFunction(i, calcStack + sp);
         sp += extraFuncArgCnt[i] - 1;
         calcStack[sp] = r;
@@ -411,11 +412,13 @@ void execEnd(void) {
 void execExtra(char cmd) {
     char n = extraCmdArgCnt[cmd];
     char i;
+    sp -= n;
     for (i = 0; i < n; i++) {
-        calcStack[sp - n + i] = calcExpression();
+        calcStack[sp + i] = calcExpression();
         advance();
     }
-    extraCommand(cmd, calcStack + (sp - n));
+    extraCommand(cmd, calcStack + sp);
+    sp += n;
 }
 
 void fetchLastInput(void) {
