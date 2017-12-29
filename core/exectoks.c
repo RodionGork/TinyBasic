@@ -18,6 +18,7 @@ short arrayBytes;
 labelCacheElem* labelCache;
 short labelsCached;
 short lastInput;
+numeric lastDim;
 
 void execRem(void);
 void execPrint(void);
@@ -31,6 +32,7 @@ void execLet(void);
 void execLeta(void);
 void execDim(void);
 void execDelay(void);
+void execData(void);
 
 void (*executors[])(void) = {
     execRem,
@@ -45,6 +47,7 @@ void (*executors[])(void) = {
     execLeta,
     execDim,
     execDelay,
+    execData,
 };
 
 void resetTokenExecutor(void) {
@@ -278,25 +281,32 @@ void execLet(void) {
     setVar(varname, calcExpression());
 }
 
-void execLeta(void) {
-    short offset = getArrayOffset(curTok->body.symbol);
+void setArray(char symbol, short idx, numeric value) {
+    short offset = getArrayOffset(symbol);
     if (offset == -1) {
         return;
     }
-    advance();
     char b = (offset & 0x8000) ? 1 : sizeof(numeric);
-    offset = (offset & 0x7FFF) + b * calcExpression();
-    advance();
+    offset = (offset & 0x7FFF) + b * idx;
     char* p = ((char*)(void*)vars) + sizeof(varHolder) * numVars + offset;
     if (b > 1) {
-        *((numeric*)(void*)p) = calcExpression();
+        *((numeric*)(void*)p) = value;
     } else {
-        *((unsigned char*)(void*)p) = (calcExpression() & 0xFF);
+        *((unsigned char*)(void*)p) = (value & 0xFF);
     }
+}
+
+void execLeta(void) {
+    char a = curTok->body.symbol;
+    advance();
+    short idx = calcExpression();
+    advance();
+    setArray(a, idx, calcExpression());
 }
 
 void execDim(void) {
     short name = shortArrayName(curTok->body.symbol);
+    lastDim = curTok->body.symbol & 0x1F;
     advance();
     short len = curTok->body.integer;
     advance();
@@ -307,6 +317,18 @@ void execDim(void) {
     }
     setVar(name, arrayBytes | (itemSize == 1 ? 0x8000 : 0));
     arrayBytes += len * itemSize;
+}
+
+void execData(void) {
+    char a = (lastDim & 0x1F) | 0x40; // capital letter
+    if (a < 'A' || a > 'Z') {
+        return;
+    }
+    do {
+        setArray(a, lastDim >> 5, curTok->body.integer);
+        advance();
+        lastDim += (1 << 5);
+    } while (curTok->type != TT_NONE);
 }
 
 void execDelay(void) {

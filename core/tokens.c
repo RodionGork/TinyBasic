@@ -34,6 +34,8 @@ static short cmdCodeByHash(numeric h) {
             return CMD_DIM;
         case 0x0783: // DELAY
             return CMD_DELAY;
+        case 0x03CD: // DATA
+            return CMD_DATA;
         default:
             return extraCommandByHash(h);
     }
@@ -350,6 +352,16 @@ char parsePrintList(void) {
     return parseNone();
 }
 
+char parseNumberList(void) {
+    do {
+        if (!parseNumber()) {
+            setTokenError(cur, 8);
+            return 0;
+        }
+    } while (*cur != 0);
+    return parseNone();
+}
+
 char parseNExpressions(char cnt) {
     if (!parseExpression()) {
         return 0;
@@ -437,6 +449,8 @@ char parseStatement(void) {
         return parseAllocate();
     } else if (cmd == CMD_DELAY) {
         return parseNExpressions(1);
+    } else if (cmd == CMD_DATA) {
+        return parseNumberList();
     } else if (cmd >= CMD_EXTRA) {
         return parseNExpressions(extraCmdArgCnt[cmd - CMD_EXTRA]);
     }
