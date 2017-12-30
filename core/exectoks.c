@@ -311,7 +311,13 @@ void execDim(void) {
     advance();
     short len = curTok->body.integer;
     advance();
-    char itemSize = curTok->type != TT_NONE ? 1 : sizeof(numeric);
+    char itemSize;
+    if (curTok->type == TT_NONE) {
+        itemSize = sizeof(numeric);
+    } else {
+        advance();
+        itemSize = 1;
+    }
     char pos = findVar(name);
     if (vars[pos].name == name) {
         return;

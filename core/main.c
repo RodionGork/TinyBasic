@@ -116,6 +116,7 @@ void executeSteps(char* lineBody, token* tokensBody) {
 }
 
 void executeRun(char* lineBody, token* tokensBody) {
+    nextLineNum = 1;
     if (editorSave()) {
         editorLoadParsed(lineBody, tokensBody);
         executeParsedRun();
