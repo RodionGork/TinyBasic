@@ -15,6 +15,7 @@ int cur;
 
 int state;
 int next;
+int lastKey;
 long delayLimit, delayT0;
 
 void sysPutc(char c);
@@ -59,16 +60,19 @@ void delay() {
     state |= STATE_DELAY;
 }
 
-int checkDelay() {
+void checkDelay() {
     if (sysMs() - delayT0 > delayLimit) {
         state &= ~STATE_DELAY;
-        printf("Done\n");
     }
 }
 
+int numFromChar(int c) {
+    c = toupper(c);
+    return (c <= '9') ? c - '0' : c - 'A' + 10;
+}
+
 void storeLine() {
-    int num = toupper(inBuf[1]);
-    num = (num <= '9') ? num - '0' : num - 'A' + 10;
+    int num = numFromChar(inBuf[1]);
     strcpy(prg + num * 16, inBuf + 2);
 }
 
@@ -80,6 +84,33 @@ void listPrg() {
         }
         printf("%02d %s\n", i, s);
     }
+}
+
+void jump() {
+    next = numFromChar(inBuf[1]);
+}
+
+void cond() {
+    if (getVar(1)) {
+        next = numFromChar(inBuf[2]);
+    }
+}
+
+void inkey() {
+    vars[varNum(1)] = ((state & STATE_RUN) != 0) ? lastKey : -1;
+    lastKey = -1;
+}
+
+void run() {
+    state = STATE_RUN;
+}
+
+void execCmd();
+
+void step() {
+    strcpy(inBuf, prg + next * 16);
+    next += 1;
+    execCmd();
 }
 
 void execCmd() {
@@ -109,6 +140,18 @@ void execCmd() {
         case 'l':
             listPrg();
             break;
+        case 'j':
+            jump();
+            break;
+        case '?':
+            cond();
+            break;
+        case 'k':
+            inkey();
+            break;
+        case 'r':
+            run();
+            break;
         default:
             printf("Bad command: %c\n", inBuf[0]);
             break;
@@ -123,8 +166,21 @@ void initCore() {
 }
 
 void tick(int c) {
-    if (state == STATE_DELAY) {
+    if (c > 0) {
+        lastKey = c;
+        if (c == 3) {
+            sysQuit();
+        }
+    }
+    if ((state & STATE_DELAY) != 0) {
         checkDelay();
+        return;
+    } else if ((state & STATE_RUN) != 0) {
+        if (lastKey != 3) {
+            step();
+        } else {
+            state &= ~STATE_RUN;
+        }
         return;
     }
     if (c >= ' ') {
@@ -142,11 +198,9 @@ void tick(int c) {
         if (cur > 0) {
             inBuf[cur] = 0;
             printf("\r\n");
-            execCmd(inBuf);
+            execCmd();
             cur = 0;
         }
-    } else if (c == 3) {
-        sysQuit();
     }
 }
 
