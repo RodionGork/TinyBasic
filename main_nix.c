@@ -38,10 +38,6 @@ void sysPutc(char c) {
     putchar(c);
 }
 
-void sysEcho(char c) {
-    sysPutc(c);
-}
-
 void sysQuit(void) {
     cleanup();
     exit(0);

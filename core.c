@@ -8,10 +8,13 @@
 #define STATE_INPUT 1
 #define STATE_DELAY 2
 
+#define PRINTF(F, V) sprintf(pBuf, (F), (V)); prn();
+
 char inBuf[128];
 char prg[16 * 36];
 int vars[26];
 int cur;
+char pBuf[128];
 
 int state;
 int next;
@@ -21,6 +24,12 @@ long delayLimit, delayT0;
 void sysPutc(char c);
 void sysQuit();
 int sysMs();
+
+void prn() {
+    for (int i = 0; pBuf[i]; i++) {
+        sysPutc(pBuf[i]);
+    }
+}
 
 int varNum(int idx) {
     return toupper(inBuf[idx]) - 'A';
@@ -82,7 +91,8 @@ void listPrg() {
         if (*s == 0) {
             break;
         }
-        printf("%02d %s\n", i, s);
+        PRINTF("%02d ", i);
+        PRINTF("%s\n", s);
     }
 }
 
@@ -129,13 +139,13 @@ void execCmd() {
             arithm();
             break;
         case 'p':
-            printf("%d\n", getVar(1));
+            PRINTF("%d\n", getVar(1));
             break;
         case 'd':
             delay();
             break;
         case 't':
-            printf("%d\n", sysMs());
+            PRINTF("%d\n", sysMs());
             break;
         case 'l':
             listPrg();
@@ -153,7 +163,7 @@ void execCmd() {
             run();
             break;
         default:
-            printf("Bad command: %c\n", inBuf[0]);
+            PRINTF("Bad command: %c\n", inBuf[0]);
             break;
     }
 }
@@ -197,7 +207,7 @@ void tick(int c) {
     } else if (c == '\r') {
         if (cur > 0) {
             inBuf[cur] = 0;
-            printf("\r\n");
+            PRINTF("%c\n", 13);
             execCmd();
             cur = 0;
         }
